@@ -32,6 +32,9 @@ flowchart LR
 „Wenn die Sensoren das messen, dann lenke und gib Gas so.“ Deshalb fährt ein Fahrer, der
 nur auf einer 540-m-Teststrecke trainiert hat, auch die 5,1 km lange Nürburgring-GP-Strecke.
 
+> Spannend war auch, was nicht klappt: Spätere Fahrer wurden schneller, aber nicht
+> vielseitiger. Das Netz lernt genau das, was es übt.
+
 ## Nürburgring, maßstäblich
 
 ![Testfahrt auf der Nürburgring-GP-Strecke mit Wagenkamera und Telemetrie](docs/bilder/02-nuerburgring.png)
@@ -81,8 +84,9 @@ Dort **Training starten** klicken. Beenden mit `Strg+C` im Terminal.
 > **„Address already in use“?** Auf Port 8000 läuft schon ein anderer Server, oft ein
 > vergessener aus einem anderen Terminal. Entweder dort mit `Strg+C` beenden oder einen
 > anderen Port nehmen: `python3 -m http.server 8001 --bind 127.0.0.1` und
-> <http://127.0.0.1:8001> öffnen. Fertige Fahrer
-liegen in `racing-lab-v2/fahrer/` und lassen sich über **JSON-Stand laden** übernehmen.
+> <http://127.0.0.1:8001> öffnen.
+
+Fertige Fahrer liegen in `racing-lab-v2/fahrer/` und lassen sich über **JSON-Stand laden** übernehmen.
 
 **In Python**, ohne Zusatzpakete und bitgenau gleich wie der Browser:
 
@@ -97,8 +101,13 @@ Mehr dazu in [`racing-lab-v2/python/README.md`](racing-lab-v2/python/README.md).
 
 ## Was wir dabei gelernt haben
 
-- **Schneller heißt nicht vielseitiger.** Fahrer, die auf einer Strecke sehr schnell wurden,
-  scheiterten oft auf anderen. Das ist Überanpassung.
+- **Schneller heißt nicht vielseitiger.** Fahrer, die auf einer Strecke länger trainiert und
+  schneller wurden, scheiterten oft auf anderen. Das ist Überanpassung.
+- **Der erste Fahrer war ein Glückstreffer.** Von 19 Fahrern, alle nur auf Testkurs 01
+  trainiert, schaffte allein der allererste alle fünf Prüfstrecken. Die übrigen 18 schafften
+  eine bis drei.
+- **Das Netz lernt, was es übt.** Testkurs 01 besteht zu 75 % aus Rechtskurven. Die Fahrer
+  scheitern deshalb vor allem an Linkskurven, etwa in der Gegenrichtung und auf dem Nürburgring.
 - **Das Verfahren nutzt jede Lücke im Modell.** Mit Reifenhaftung lernten die Wagen nicht
   zu bremsen, sondern fuhren einfach langsamer oder nutzten das Rutschen als Bremse.
 - **Ein Lauf ist keine Statistik.** Vergleiche laufen mit festen Seeds und mehreren
