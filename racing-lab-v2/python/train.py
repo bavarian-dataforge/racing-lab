@@ -8,6 +8,7 @@ ist eine JSON-Datei, die der Browser über „JSON-Stand laden“ übernimmt.
   python3 train.py --track training --grip 0                       # Physik wie v1, ohne Haftungsgrenze
   python3 train.py --track nuerburgring --generations 40 --pop 40 --seed 7
   python3 train.py --track nuerburgring --init ../../racing-training.json   # Vorwissen nutzen
+  python3 train.py --method single --attempts 300 --grip 0         # Einzelwagen wie v1 (Hill Climbing)
 """
 import argparse
 import datetime
@@ -45,6 +46,9 @@ def describe(grip, slide):
 
 
 def algorithm(args):
+    """Lernverfahren in Worten – gleiche Schreibweise wie im Browser, plus Python und Seed."""
+    if args.method == "single":
+        return f"Einzelwagen (Hill Climbing) · Python, Seed {args.seed}"
     return f"Population (genetischer Algorithmus) · {args.pop} Wagen · Python, Seed {args.seed}"
 
 
@@ -57,8 +61,9 @@ def export(path, args, track, best, gen, log, tests=()):
         "formatVersion": 1, "app": "racing-lab-v2-python",
         "meta": {"exportedAt": now(), "trainingTrack": track.name, "physics": describe(args.grip, args.slide),
                  "algorithm": algorithm(args), "trainedAt": best.get("at")},
-        "algorithm": "genetic algorithm: elitism, tournament selection, neuron-block crossover, mutation",
-        "population": args.pop, "generation": gen, "seed": args.seed, "physics": physics(args.grip, args.slide),
+        "algorithm": ("sequential random mutation with elitist selection" if args.method == "single" else
+                      "genetic algorithm: elitism, tournament selection, neuron-block crossover, mutation"),
+        "population": 1 if args.method == "single" else args.pop, "generation": gen, "seed": args.seed, "physics": physics(args.grip, args.slide),
         "architecture": [9, 10, 2],
         "weightLayout": "hidden: bias then 9 inputs per neuron; output: bias then 10 hidden per neuron",
         "reward": "min(progress, lap) - 0.6*time + 500 for completed lap", "sensorRange": 180,
@@ -71,29 +76,10 @@ def export(path, args, track, best, gen, log, tests=()):
         json.dump(data, f, indent=1)
 
 
-def main():
-    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--track", default="training", choices=sorted(tracks.TRAINABLE))
-    p.add_argument("--pop", type=int, default=40, help="Wagen je Generation")
-    p.add_argument("--generations", type=int, default=30)
-    p.add_argument("--seed", type=int, default=1, help="Zufallsstart – gleicher Seed, gleiches Ergebnis")
-    p.add_argument("--grip", type=float, default=1.5, help="Haftung µ in g (0 = Physik wie v1)")
-    p.add_argument("--init", help="JSON eines vorhandenen Fahrers als Startpunkt")
-    p.add_argument("--out", help="Zieldatei (Standard: fahrer-<strecke>-seed<seed>.json)")
-    p.add_argument("--slide", type=float, default=0.7,
-                   help="Gleitreibung als Anteil der Haftung (1 = v2.1, kein Kontrollverlust)")
-    p.add_argument("--workers", type=int, default=os.cpu_count())
-    args = p.parse_args()
-    out = args.out or f"fahrer-{args.track}-seed{args.seed}.json"
-
-    track = tracks.load(args.track)
-    evo = Evolution(args.seed)
-    start = json.load(open(args.init))["bestWeights"] if args.init else None
+def run_population(args, track, evo, start, out, log):
+    """Genetischer Algorithmus: je Generation fahren alle Wagen parallel."""
     population = evo.first_generation(args.pop, start)
     best = {"score": float("-inf"), "progress": 0, "weights": None}
-    log = []
-    phys = describe(args.grip, args.slide)
-    print(f"{track.name} · {track.total * .2:.0f} m · {args.pop} Wagen · Seed {args.seed} · {phys} · {args.workers} Kerne\n")
     print(f"{'Gen':>4} {'bester Score':>13} {'Strecke':>8} {'Zeit':>8} {'Runden':>7} {'Rechenzeit':>11}")
     with Pool(args.workers, initializer=_init, initargs=(args.track, args.grip, args.slide)) as pool:
         for gen in range(1, args.generations + 1):
@@ -110,6 +96,56 @@ def main():
                   f"{time.perf_counter() - t0:10.1f}s")
             export(out, args, track, best, gen, log)
             population = evo.next_generation([(r[0], w) for r, w in zip(results, population)], best["weights"], args.pop)
+    return best, gen
+
+
+def run_single(args, track, evo, start, out, log):
+    """Hill Climbing wie v1: ein Wagen je Versuch. Ist er besser als der bisher Beste,
+    wird er der neue Beste; der nächste Versuch ist eine mutierte Kopie des Besten."""
+    _init(args.track, args.grip, args.slide)
+    weights = start[:] if start else evo.fresh()
+    best = {"score": float("-inf"), "progress": 0, "weights": None}
+    print(f"{'Versuch':>7} {'Score':>10} {'Strecke':>8} {'Zeit':>8}  Ergebnis")
+    for attempt in range(1, args.attempts + 1):
+        score, prog, t, reason = evaluate(weights)
+        improved = score > best["score"]
+        if improved:
+            best = {"score": score, "progress": prog, "weights": weights[:], "at": now()}
+            print(f"{attempt:7d} {score:10.1f} {min(prog / track.total, 1) * 100:7.1f}% {t:7.2f}s  {reason} · Verbesserung")
+        log.append({"at": now(), "algorithm": algorithm(args), "attempt": attempt, "generation": attempt, "car": 0,
+                    "score": score, "progress": prog, "time": t, "reason": reason, "improved": improved})
+        if improved or attempt % 50 == 0:
+            export(out, args, track, best, attempt, log[-200:])
+        weights = evo.next_single(best["weights"])
+    print(f"… {args.attempts} Versuche, davon {sum(r['improved'] for r in log)} Verbesserungen")
+    return best, args.attempts
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--track", default="training", choices=sorted(tracks.TRAINABLE))
+    p.add_argument("--method", default="population", choices=["population", "single"],
+                   help="population = genetischer Algorithmus, single = Einzelwagen/Hill Climbing wie v1")
+    p.add_argument("--pop", type=int, default=40, help="Wagen je Generation (nur population)")
+    p.add_argument("--generations", type=int, default=30, help="nur population")
+    p.add_argument("--attempts", type=int, default=300, help="Versuche (nur single)")
+    p.add_argument("--seed", type=int, default=1, help="Zufallsstart – gleicher Seed, gleiches Ergebnis")
+    p.add_argument("--grip", type=float, default=1.5, help="Haftung µ in g (0 = Physik wie v1)")
+    p.add_argument("--slide", type=float, default=0.7,
+                   help="Gleitreibung als Anteil der Haftung (1 = v2.1, kein Kontrollverlust)")
+    p.add_argument("--init", help="JSON eines vorhandenen Fahrers als Startpunkt")
+    p.add_argument("--out", help="Zieldatei (Standard: fahrer-<strecke>-<verfahren>-seed<seed>.json)")
+    p.add_argument("--workers", type=int, default=os.cpu_count())
+    args = p.parse_args()
+    out = args.out or f"fahrer-{args.track}-{args.method}-seed{args.seed}.json"
+
+    track = tracks.load(args.track)
+    evo = Evolution(args.seed)
+    start = json.load(open(args.init))["bestWeights"] if args.init else None
+    log = []
+    print(f"{track.name} · {track.total * .2:.0f} m · {algorithm(args)} · {describe(args.grip, args.slide)}\n")
+    run = run_single if args.method == "single" else run_population
+    best, last = run(args, track, evo, start, out, log)
     # Abschlussfahrt des besten Fahrers mit eingefrorenen Gewichten – dient im Browser-Test
     # (tests/regression.cjs) als Paritätsreferenz.
     car, reason, _ = reference.drive(track, best["weights"], args.grip, args.slide)
@@ -117,7 +153,7 @@ def main():
             "trainedOn": track.name, "trainedAt": best["at"], "trackId": track.id, "course": track.name, "driver": "Python-Training",
             "progressPercent": max(0, min(100, car.max / track.total * 100)), "time": car.time,
             "completed": reason == "Runde geschafft!", "reason": reason, "weightsUnchanged": True}
-    export(out, args, track, best, gen, log, [test])
+    export(out, args, track, best, last, log[-2000:], [test])
     print(f"\nGespeichert: {out}  →  im Browser „JSON-Stand laden“ oder: python3 replay.py {out}")
 
 

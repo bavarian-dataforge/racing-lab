@@ -144,3 +144,16 @@ kräftiger. Der Hauptunterschied bleibt aber das niedrigere Höchsttempo.
 
 Alle vier Fahrer mit Haftung fahren im Browser-Code exakt ihre Python-Zeiten.
 
+
+## v2.3 · Einzelwagen-Verfahren in Python
+
+`python3 train.py --method single --attempts 300 --grip 0 --seed 1`, also v1-Verfahren
+und v1-Physik:
+
+- Erste volle Runde nach 54 Versuchen, nach 300 Versuchen 16,05 s (16 Verbesserungen,
+  17 s Rechenzeit). Mit gleichem Seed bitgenau reproduzierbar.
+- Im Browser-Code dieselbe Zeit (16,0500 s), und der Import stellt das Lernverfahren auf
+  „Einzelwagen“.
+- Übertragbarkeit (eingefroren): Kurs 01 ✓, 02 ✗ 73 %, 03 ✓, 04 ✗ 23 %, 05 ✓, Nürburgring ✗ 8 %.
+  Flos v1-Fahrer (16,60 s) schafft alle sechs. Auch hier gilt: schneller heißt nicht vielseitiger.
+  Ein Einzellauf ist keine Statistik.

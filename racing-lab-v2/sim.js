@@ -238,6 +238,7 @@ $('importFile').onchange=async e=>{
     if(dp.model==='kamm'&&(dp.grip!==GRIP||!phys))throw Error('Fahrer wurde mit Haftung '+dp.grip+' g und Gleitreibung '+pct(slide)+' trainiert; diese Seite kennt '+GRIP+' g mit 100 % oder '+pct(SLIDE)+'.');if(phys!==physics)switchPhysics(phys);
     const target=courses[data.trainingTrackId]&&courses[data.trainingTrackId].trainable?data.trainingTrackId:'training';
     switchDriver(target);switchCourse(target);
+    setMethod(data.population===1||/^sequential/.test(data.algorithm||'')?'single':'population');// weiter mit dem Verfahren, mit dem er trainiert wurde
     origin=data.meta&&typeof data.meta==='object'?{date:data.meta.trainedAt||null,algorithm:data.meta.algorithm||null}:{date:null,algorithm:/genetic/.test(data.algorithm||'')?'Population (genetischer Algorithmus)':'Einzelwagen (Hill Climbing)'};
     incumbent=data.bestWeights.slice();bestScore=data.bestScore;records=Array.isArray(data.records)?data.records.filter(r=>r&&Number.isSafeInteger(r.attempt)&&Number.isFinite(r.score)&&Number.isFinite(r.progress)&&Number.isFinite(r.time)).slice(-200):[];samples=Array.isArray(data.samples)?data.samples.slice(-1000):[];testResults=Array.isArray(data.testResults)?data.testResults.slice(-50):[];showTestResults();
     bestProgress=Number.isFinite(data.bestProgress)?Math.max(0,Math.min(T.total,data.bestProgress)):Math.max(0,...records.filter(r=>r.improved).map(r=>Math.min(T.total,r.progress)));

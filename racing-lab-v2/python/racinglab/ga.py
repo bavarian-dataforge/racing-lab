@@ -28,6 +28,16 @@ class Evolution:
         scale = .7 if self.rng.random() < .1 else .12 + self.rng.random() * .2
         return [v + self.rand() * scale if self.rng.random() < rate else v for v in w]
 
+    def mutate_v1(self, w):
+        """Mutation wie im v1-Einzelwagen: 65 % der Gewichte ändern sich,
+        in 12 % der Fälle mit großem Schritt (±0,7)."""
+        scale = .7 if self.rng.random() < .12 else .12 + self.rng.random() * .2
+        return [v + self.rand() * scale if self.rng.random() < .65 else v for v in w]
+
+    def next_single(self, best_ever):
+        """Hill Climbing (v1): meist eine mutierte Kopie des Besten, in 5 % ein Neustart."""
+        return self.fresh() if self.rng.random() < .05 else self.mutate_v1(best_ever)
+
     def crossover(self, a, b):
         child = a[:]
         for s, e in BLOCKS:

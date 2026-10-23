@@ -220,6 +220,12 @@ Das Paket enthält die ausführbare Oberfläche, den Simulationscode, Startanlei
 - **Erkenntnis:** Das Netz findet lieber „gleichmäßig langsam“ als „spät bremsen“. Mehr Physik macht die Demo nicht verständlicher.
 - **Richtungsentscheidung (Flo):** Der Fokus liegt auf dem Verständnis des neuronalen Netzes und einer LinkedIn-Demo. Weitere Physik-Erweiterungen nur nach Rückfrage.
 
+## 15. v2.3: Einzelwagen-Verfahren in Python
+
+- **Ziel:** Das ursprüngliche v1-Lernverfahren auch in Python nutzen, mit derselben Protokollierung.
+- **Änderung:** `train.py --method single --attempts N` (Hill Climbing wie v1: 65 % der Gewichte mutieren, 5 % Neustarts). Kopf `meta` und Prüfprotokoll nennen „Einzelwagen (Hill Climbing) · Python, Seed …“. Der Browser übernimmt beim Import das passende Lernverfahren.
+- **Beobachtung:** Seed 1: erste Runde nach 54 Versuchen, 16,05 s nach 300 Versuchen. Schafft 3 von 6 Strecken; Flos v1-Fahrer alle 6.
+
 ## Technische Vereinfachungen
 
 Das Fahrzeug verwendet ein vereinfachtes kinematisches Modell mit Lenkung, Beschleunigen, Bremsen und geschwindigkeitsabhängigem Widerstand. Es werden keine Federung, Dämpfung, Reifenschlupf, Motorkennfelder oder Drehzahl simuliert.

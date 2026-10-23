@@ -13,7 +13,7 @@ Benötigt nur Python 3 (ab 3.9), keine Zusatzpakete.
 | `racinglab/tracks.py` | Strecken: Catmull-Rom-Kurven der Testkurse, Nürburgring aus `tracks/nuerburgring.json` |
 | `racinglab/reference.py` | Ein Wagen: Sensoren, Netz (`predict`), Fahrphysik, Fortschritt, Bewertung |
 | `racinglab/ga.py` | Genetischer Algorithmus: Elite, Turnier, Kreuzung, Mutation |
-| `train.py` | Training einer Population, parallel auf allen CPU-Kernen |
+| `train.py` | Training: Population (parallel auf allen CPU-Kernen) oder Einzelwagen wie v1 |
 | `replay.py` | Testfahrt mit eingefrorenen Gewichten auf allen Strecken |
 | `analyze.py` | Fahrstil: wie oft bremst und rutscht ein Fahrer, welches Tempo |
 | `tools/build_nuerburgring.py` | Rechnet die TUM-CSV in Simulationseinheiten um |
@@ -40,6 +40,15 @@ Ohne Haftungsgrenze, also Physik wie v1:
 ```bash
 python3 train.py --track training --grip 0
 ```
+
+Einzelwagen wie in v1 (Hill Climbing: ein Wagen je Versuch, mutierte Kopie des Besten):
+
+```bash
+python3 train.py --method single --attempts 300 --grip 0
+```
+
+Jede Fahrer-Datei hält im Kopf `meta` fest, wann, auf welcher Strecke, mit welcher Physik
+und mit welchem Verfahren trainiert wurde. Der Browser zeigt diese Angaben im Prüfprotokoll.
 
 Mit Vorwissen starten, also vom Fahrer aus Testkurs 01 aus weitertrainieren:
 

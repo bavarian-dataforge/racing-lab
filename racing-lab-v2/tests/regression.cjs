@@ -179,6 +179,7 @@ async function run() {
     await load(reloaded.el, data);
     const want = data.physics?.model !== 'kamm' ? 'v1' : (data.physics.slide ?? 1) === 1 ? 'grip' : 'slide';
     assert.equal(reloaded.lab.stats().physics, want, f);
+    assert.equal(reloaded.lab.stats().method, data.population === 1 ? 'single' : 'population', f);
     reloaded.lab.switchCourse(ref.trackId); reloaded.lab.beginTest();
     runUntil(reloaded.lab, () => !reloaded.lab.stats().running, 60000);
     const got = reloaded.lab.stats().testResults.at(-1);
