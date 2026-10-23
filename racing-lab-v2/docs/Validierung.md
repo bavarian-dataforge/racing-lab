@@ -295,4 +295,13 @@ dem die Haftung reicht. Der Preis ist Zeit: Nürburgring 234 s statt 152 s ohne 
 **Einschränkung:** Das sind Einzelfahrer, im Browser ohne festen Seed trainiert. Auffällig
 ist, dass die Kombination mit der Abstandsregel unter Haftung schlechter abschnitt (2/6). Ob
 die Abstandsregel mit Haftung tatsächlich stört, ist offen und braucht ein Experiment mit
-mehreren Seeds. Fahrer: `fahrer/fahrer-training-slide-ruhe-browser-2026-10-23.json`.
+mehreren Seeds.
+
+Dateien (schlanke Kopien in `fahrer/`, gleiche Reihenfolge wie die Tabelle):
+`fahrer-training-slide-browser-gen60-2026-10-23.json`,
+`fahrer-training-slide-abstand+ruhe-browser-2026-10-23.json`,
+`fahrer-training-grip-ruhe-browser-2026-10-23.json`,
+`fahrer-training-slide-ruhe-browser-2026-10-23.json`.
+Dazu Flos Browser-Fahrer ohne Haftung mit Abstand + Lenkruhe (Generation 62, 5 von 6 Strecken,
+Nürburgring 152,55 s, scheitert nur am Start der Gegenrichtung):
+`fahrer-training-v1physik-abstand+ruhe-browser-2026-10-23.json`.
