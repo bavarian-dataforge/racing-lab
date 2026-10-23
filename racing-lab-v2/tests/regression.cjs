@@ -81,6 +81,14 @@ async function run() {
     console.log(`  Flos Fahrer auf dem Nürburgring: ${ring.progressPercent.toFixed(1)} % nach ${ring.time.toFixed(2)} s (${ring.reason})`);
   }
 
+  // Bestzeit je Strecke: aus Testfahrten übernommen und angezeigt
+  const laps = lab.stats().bestLaps;
+  if (fs.existsSync(v1File)) {
+    assert(Math.abs(laps.hairpin - 18.9833) < 1e-3 && Math.abs(laps.nuerburgring - 151.7167) < 1e-3, JSON.stringify(laps));
+    lab.switchCourse('hairpin'); render();
+    assert.equal(el('bestLap').textContent, '18.98 s');
+  }
+
   // 2) Testfahrten verändern Gewichte und Bestwerte nicht.
   const model = Array(122).fill(0);
   model[111] = .7;

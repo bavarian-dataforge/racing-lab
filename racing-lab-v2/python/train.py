@@ -71,6 +71,7 @@ def export(path, args, track, best, gen, log, tests=()):
         "bestProgress": best["progress"], "trainingLength": track.total,
         "bestScore": best["score"], "bestWeights": best["weights"],
         "records": log, "samples": [], "testResults": list(tests),
+        "bestLaps": {t["trackId"]: t["time"] for t in tests if t["completed"]},
     }
     with open(path, "w") as f:
         json.dump(data, f, indent=1)

@@ -115,6 +115,7 @@ Mehr dazu in [`racing-lab-v2/python/README.md`](racing-lab-v2/python/README.md).
 | **v2.3** | Einzelwagen-Verfahren auch in Python |
 | **v2.4** | MIT-Lizenz, Quellenangaben, Repository öffentlich |
 | **v2.5** | README mit Bildern; Aufnahmeskript `racing-lab-v2/tools/screenshots.mjs` |
+| **v2.6** | Rundenzeit live und Bestzeit je Strecke in der Telemetrie |
 
 Jede Stufe hat ein Git-Tag. Die ausführliche Chronologie steht in
 [`racing-lab-v2/docs/Racing-Lab-Chronologie.md`](racing-lab-v2/docs/Racing-Lab-Chronologie.md).

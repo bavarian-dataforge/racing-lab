@@ -247,6 +247,17 @@ Das Paket enthält die ausführbare Oberfläche, den Simulationscode, Startanlei
   Nach dem Laden eines Fahrers blieb die Kurve „Bester Score“ leer. Sie wird jetzt aus den
   mitgelieferten Versuchen nachgebildet.
 
+## 18. v2.6: Rundenzeit und Bestzeit je Strecke
+
+- **Wunsch (Flo):** Die Zeit soll in der Anzeige stehen, und zwar je Strecke.
+- **Umsetzung:** Telemetrie zeigt „Rundenzeit“ (läuft live) und „Bestzeit hier“ (beste
+  geschaffte Runde auf der gewählten Strecke für Fahrer und Physik). Die Bestzeit stammt aus
+  Training und Testfahrten, wird gespeichert und als `bestLaps` exportiert. Ältere Dateien
+  werden aus ihren Test- und Trainingsprotokollen ergänzt.
+- **Messung (Flo, Browser):** Haftung + Gleitreibung, 40 Wagen, Testkurs 01: erste volle
+  Runde in Generation 25, Rundenzeit 33,40 s. Python-Vergleich mit derselben Physik:
+  Generation 12, 16 und 21 (Seeds 1–3).
+
 ## Technische Vereinfachungen
 
 Das Fahrzeug verwendet ein vereinfachtes kinematisches Modell mit Lenkung, Beschleunigen, Bremsen und geschwindigkeitsabhängigem Widerstand. Es werden keine Federung, Dämpfung, Reifenschlupf, Motorkennfelder oder Drehzahl simuliert.
