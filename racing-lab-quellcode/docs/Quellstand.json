@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-23",
+  "project": "Racing Lab",
+  "source_commit": "c72ff3e98e1cd5f46ec3aed2c0a08f0c02fcb40e",
+  "language": "JavaScript",
+  "architecture": [
+    9,
+    10,
+    2
+  ],
+  "source_unchanged": true,
+  "trained_driver_included": false,
+  "sha256": {
+    "README.md": "e46d0cf62d936b1b2ee7be128eaa478ee3a8a6a218d1ea5a2e3c7af0ccc7c718",
+    "docs/Racing-Lab-Chronologie.md": "c319f1fd3024d02a91a1167d5ebebf339b6935e2c264f381f945f94aa2c1918d",
+    "docs/Technik-und-Grenzen.md": "bd847d6afa48562df049b891ef44ab9dcb71051ad1d111ad7403000a48559931",
+    "docs/Validierung.md": "68199483989ca62cb890b86cd9006a6bb9cc38b095b28b99bef3edf5f8bb4aca",
+    "index.html": "6013e626f34d7679aa66fbd193074f59aae6913b4b2127214f177b6699b9ce52",
+    "package.json": "519f9b9910e84e747f8019b9ccf39b2caf3cc596b57dfe1f5e357205bdaa0432",
+    "sim.js": "cde20554d55a5ccfd0e5feb91e4c80d24120ea2c34f62179b8d5ffb8c398b906",
+    "tests/regression.cjs": "e4b0596fea692062f094a79def0d1a3b346ad3984d8a86e235bb384f73058327"
+  }
+}

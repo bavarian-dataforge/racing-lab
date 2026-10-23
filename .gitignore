@@ -1,0 +1,5 @@
+.DS_Store
+__pycache__/
+*.pyc
+# ZIP ist nur die Lieferform von v1; der Inhalt liegt entpackt in racing-lab-quellcode/
+*.zip
