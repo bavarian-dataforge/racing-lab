@@ -1,9 +1,9 @@
-"""Fahrstil-Analyse: Wie oft bremst, rutscht und lenkt ein Fahrer?
+"""Driving-style analysis: how often does a driver brake, slide and steer?
 
-  python3 analyze.py ../fahrer/*.json
-  python3 analyze.py fahrer.json --track nuerburgring --grip 1.5 --slide 0.75
+  python3 analyze.py ../drivers/*.json
+  python3 analyze.py driver.json --track nuerburgring --grip 1.5 --slide 0.7
 
-Ohne Angaben fährt jeder Fahrer auf seiner Trainingsstrecke mit seiner Trainingsphysik.
+Without options every driver drives on its training track with its training physics.
 """
 import argparse
 import json
@@ -21,7 +21,7 @@ args = parser.parse_args()
 
 
 def analyze(w, track, grip, slide):
-    """Fährt eine Runde und zählt Pedal, Rutschen und Tempo je Zeitschritt."""
+    """Drives one lap and counts throttle, sliding and speed per time step."""
     pedals, slips, speeds = [], [], []
     original = reference.predict
 
@@ -39,14 +39,14 @@ def analyze(w, track, grip, slide):
     n = len(pedals)
     return {
         "reason": reason, "time": car.time, "progress": min(100, car.max / track.total * 100),
-        "brake": sum(p < 0 for p in pedals) / n * 100,       # Pedal unter 0 = Bremse
+        "brake": sum(p < 0 for p in pedals) / n * 100,       # pedal below 0 = brake
         "full_brake": sum(p < -.5 for p in pedals) / n * 100,
         "slip": sum(s > 0 for s in slips) / n * 100,
-        "vmin": min(speeds[60:] or speeds) * .72, "vmax": max(speeds) * .72,  # Einheiten/s → km/h
+        "vmin": min(speeds[60:] or speeds) * .72, "vmax": max(speeds) * .72,  # units/s → km/h
     }
 
 
-print(f"{'Fahrer':42} {'Strecke':13} {'Physik':36} {'Ergebnis':>16} {'bremst':>7} {'davon >50%':>10} {'rutscht':>8} {'Tempo km/h':>11}")
+print(f"{'Driver':50} {'track':13} {'physics':42} {'result':>10} {'brakes':>7} {'of it >50%':>10} {'slides':>7} {'speed km/h':>11}")
 for f in args.drivers:
     data = json.load(open(f))
     phys = data.get("physics", {"model": "v1"})
@@ -54,6 +54,6 @@ for f in args.drivers:
     slide = args.slide if args.slide is not None else phys.get("slide", 1.0)
     track = tracks.load(args.track or data.get("trainingTrackId", "training"))
     r = analyze(data["bestWeights"], track, grip, slide)
-    result = f"{r['time']:.2f} s" if r["reason"] == "Runde geschafft!" else f"✗ {r['progress']:.0f} %"
-    print(f"{Path(f).name:42} {track.id:13} {describe(grip, slide):36} {result:>16} {r['brake']:6.1f}% "
-          f"{r['full_brake']:9.1f}% {r['slip']:7.1f}% {r['vmin']:5.0f}–{r['vmax']:<5.0f}")
+    result = f"{r['time']:.2f} s" if r["reason"] == reference.LAP else f"✗ {r['progress']:.0f} %"
+    print(f"{Path(f).name:50} {track.id:13} {describe(grip, slide):42} {result:>10} {r['brake']:6.1f}% "
+          f"{r['full_brake']:9.1f}% {r['slip']:6.1f}% {r['vmin']:5.0f}–{r['vmax']:<5.0f}")

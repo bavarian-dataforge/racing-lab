@@ -1,17 +1,17 @@
-"""Trainiert einen Fahrer mit einer Population (genetischer Algorithmus).
+"""Trains a driver with a population (genetic algorithm) or a single car (hill climbing).
 
-Jede Generation fahren alle Wagen parallel auf mehreren CPU-Kernen. Das Ergebnis
-ist eine JSON-Datei, die der Browser über „JSON-Stand laden“ übernimmt.
+In population mode all cars of a generation drive in parallel on several CPU cores. The
+result is a JSON file that the browser takes over via "Load JSON state".
 
-  python3 train.py --track training --generations 30              # Haftung 1,5 g + Gleitreibung (v2.2)
-  python3 train.py --track training --slide 1                      # Haftung ohne Gleitreibung (v2.1)
-  python3 train.py --track training --grip 0                       # Physik wie v1, ohne Haftungsgrenze
+  python3 train.py --track training --generations 30              # grip 1.5 g + sliding friction (v2.2)
+  python3 train.py --track training --slide 1                      # grip without sliding friction (v2.1)
+  python3 train.py --track training --grip 0                       # physics as in v1, no grip limit
   python3 train.py --track nuerburgring --generations 40 --pop 40 --seed 7
-  python3 train.py --track nuerburgring --init ../../racing-training.json   # Vorwissen nutzen
-  python3 train.py --method single --attempts 300 --grip 0         # Einzelwagen wie v1 (Hill Climbing)
-  python3 train.py --grip 0 --clearance                            # mit Abstandsregel (2,5 m zur Wand)
-  python3 train.py --grip 0 --calm                                 # mit Lenkruhe (Lenkweg kostet Punkte)
-  python3 train.py --grip 0 --clearance --calm                     # beides kombiniert
+  python3 train.py --track nuerburgring --init ../../racing-training.json   # start from an existing driver
+  python3 train.py --method single --attempts 300 --grip 0         # single car as in v1 (hill climbing)
+  python3 train.py --grip 0 --clearance                            # with clearance rule (2.5 m to the wall)
+  python3 train.py --grip 0 --calm                                 # with steering calm (steering travel costs points)
+  python3 train.py --grip 0 --clearance --calm                     # both combined
 """
 import argparse
 import datetime
@@ -41,8 +41,9 @@ def physics(grip, slide):
 
 
 def scoring(args):
-    """Bewertung in Worten und als Datensatz – gleiche Schreibweise und Modellnamen wie im Browser.
-    Modelle: standard · abstand · ruhe · abstand+ruhe (Abstandsregel und Lenkruhe kombinierbar)."""
+    """Scoring in words and as data – same wording and model names as in the browser.
+    Models: standard · abstand (clearance) · ruhe (calm) · abstand+ruhe; the model names are
+    kept as stored in existing data files."""
     clear, calm = getattr(args, "clearance", False), getattr(args, "calm", False)
     if not (clear or calm):
         return "Standard", {"model": "standard"}
@@ -51,23 +52,22 @@ def scoring(args):
         data.update(minDistanceM=2.5, weight=reference.CLEAR_WEIGHT)
     if calm:
         data.update(calmWeight=reference.CALM_WEIGHT)
-    text = " + ".join(t for t, on in (("Abstandsregel 2,5 m", clear), ("Lenkruhe", calm)) if on)
-    return "mit " + text, data
+    text = " + ".join(t for t, on in (("clearance rule 2.5 m", clear), ("steering calm", calm)) if on)
+    return "with " + text, data
 
 
 def describe(grip, slide):
-    """Physik in Worten – gleiche Schreibweise wie im Browser."""
+    """Physics in words – same wording as in the browser."""
     if not grip:
-        return "ohne Haftungsgrenze (v1)"
-    g = f"{grip:g}".replace(".", ",")
-    return f"mit Haftung {g} g" + (f" + Gleitreibung {round(slide * 100)} %" if slide < 1 else " ohne Gleitreibung")
+        return "no grip limit (v1)"
+    return f"with grip {grip:g} g" + (f" + sliding friction {round(slide * 100)}%" if slide < 1 else " without sliding friction")
 
 
 def algorithm(args):
-    """Lernverfahren in Worten – gleiche Schreibweise wie im Browser, plus Python und Seed."""
+    """Learning method in words – same wording as in the browser, plus Python and seed."""
     if args.method == "single":
-        return f"Einzelwagen (Hill Climbing) · Python, Seed {args.seed}"
-    return f"Population (genetischer Algorithmus) · {args.pop} Wagen · Python, Seed {args.seed}"
+        return f"Single car (hill climbing) · Python, seed {args.seed}"
+    return f"Population (genetic algorithm) · {args.pop} cars · Python, seed {args.seed}"
 
 
 def now():
@@ -99,10 +99,10 @@ def export(path, args, track, best, gen, log, tests=()):
 
 
 def run_population(args, track, evo, start, out, log):
-    """Genetischer Algorithmus: je Generation fahren alle Wagen parallel."""
+    """Genetic algorithm: in every generation all cars drive in parallel."""
     population = evo.first_generation(args.pop, start)
     best = {"score": float("-inf"), "progress": 0, "weights": None}
-    print(f"{'Gen':>4} {'bester Score':>13} {'Strecke':>8} {'Zeit':>8} {'Runden':>7} {'Rechenzeit':>11}")
+    print(f"{'Gen':>4} {'best score':>13} {'distance':>8} {'time':>8} {'laps':>7} {'compute':>11}")
     with Pool(args.workers, initializer=_init, initargs=(args.track, args.grip, args.slide, args.clearance, args.calm)) as pool:
         for gen in range(1, args.generations + 1):
             t0 = time.perf_counter()
@@ -111,7 +111,7 @@ def run_population(args, track, evo, start, out, log):
             score, prog, t, reason = results[top]
             if score > best["score"]:
                 best = {"score": score, "progress": prog, "weights": population[top][:], "at": now()}
-            laps = sum(r[3] == "Runde geschafft!" for r in results)
+            laps = sum(r[3] == reference.LAP for r in results)
             log.append({"at": now(), "algorithm": algorithm(args), "attempt": gen * args.pop, "generation": gen, "score": score, "progress": prog,
                         "time": t, "reason": reason, "improved": score >= best["score"]})
             print(f"{gen:4d} {score:13.1f} {min(prog / track.total, 1) * 100:7.1f}% {t:7.2f}s {laps:4d}/{args.pop:<3d}"
@@ -122,24 +122,24 @@ def run_population(args, track, evo, start, out, log):
 
 
 def run_single(args, track, evo, start, out, log):
-    """Hill Climbing wie v1: ein Wagen je Versuch. Ist er besser als der bisher Beste,
-    wird er der neue Beste; der nächste Versuch ist eine mutierte Kopie des Besten."""
+    """Hill climbing as in v1: one car per attempt. If it is better than the best so far, it
+    becomes the new best; the next attempt is a mutated copy of the best."""
     _init(args.track, args.grip, args.slide, args.clearance, args.calm)
     weights = start[:] if start else evo.fresh()
     best = {"score": float("-inf"), "progress": 0, "weights": None}
-    print(f"{'Versuch':>7} {'Score':>10} {'Strecke':>8} {'Zeit':>8}  Ergebnis")
+    print(f"{'attempt':>7} {'score':>10} {'distance':>8} {'time':>8}  result")
     for attempt in range(1, args.attempts + 1):
         score, prog, t, reason = evaluate(weights)
         improved = score > best["score"]
         if improved:
             best = {"score": score, "progress": prog, "weights": weights[:], "at": now()}
-            print(f"{attempt:7d} {score:10.1f} {min(prog / track.total, 1) * 100:7.1f}% {t:7.2f}s  {reason} · Verbesserung")
+            print(f"{attempt:7d} {score:10.1f} {min(prog / track.total, 1) * 100:7.1f}% {t:7.2f}s  {reason} · improvement")
         log.append({"at": now(), "algorithm": algorithm(args), "attempt": attempt, "generation": attempt, "car": 0,
                     "score": score, "progress": prog, "time": t, "reason": reason, "improved": improved})
         if improved or attempt % 50 == 0:
             export(out, args, track, best, attempt, log[-200:])
         weights = evo.next_single(best["weights"])
-    print(f"… {args.attempts} Versuche, davon {sum(r['improved'] for r in log)} Verbesserungen")
+    print(f"… {args.attempts} attempts, {sum(r['improved'] for r in log)} of them improvements")
     return best, args.attempts
 
 
@@ -147,40 +147,40 @@ def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--track", default="training", choices=sorted(tracks.TRAINABLE))
     p.add_argument("--method", default="population", choices=["population", "single"],
-                   help="population = genetischer Algorithmus, single = Einzelwagen/Hill Climbing wie v1")
-    p.add_argument("--pop", type=int, default=40, help="Wagen je Generation (nur population)")
-    p.add_argument("--generations", type=int, default=30, help="nur population")
-    p.add_argument("--attempts", type=int, default=300, help="Versuche (nur single)")
-    p.add_argument("--seed", type=int, default=1, help="Zufallsstart – gleicher Seed, gleiches Ergebnis")
-    p.add_argument("--grip", type=float, default=1.5, help="Haftung µ in g (0 = Physik wie v1)")
+                   help="population = genetic algorithm, single = single car / hill climbing as in v1")
+    p.add_argument("--pop", type=int, default=40, help="cars per generation (population only)")
+    p.add_argument("--generations", type=int, default=30, help="population only")
+    p.add_argument("--attempts", type=int, default=300, help="attempts (single only)")
+    p.add_argument("--seed", type=int, default=1, help="random start – same seed, same result")
+    p.add_argument("--grip", type=float, default=1.5, help="grip µ in g (0 = physics as in v1)")
     p.add_argument("--slide", type=float, default=0.7,
-                   help="Gleitreibung als Anteil der Haftung (1 = v2.1, kein Kontrollverlust)")
+                   help="sliding friction as a share of grip (1 = v2.1, no loss of control)")
     p.add_argument("--clearance", action="store_true",
-                   help="Abstandsregel: seitlicher Abstand unter 2,5 m kostet Punkte")
+                   help="clearance rule: side clearance below 2.5 m costs points")
     p.add_argument("--calm", action="store_true",
-                   help="Lenkruhe: jede Lenkänderung kostet Punkte (2 je Einheit Lenkweg)")
-    p.add_argument("--init", help="JSON eines vorhandenen Fahrers als Startpunkt")
-    p.add_argument("--out", help="Zieldatei (Standard: fahrer-<strecke>-<verfahren>-seed<seed>.json)")
+                   help="steering calm: every steering change costs points (2 per unit of travel)")
+    p.add_argument("--init", help="JSON of an existing driver as the starting point")
+    p.add_argument("--out", help="output file (default: driver-<track>-<method>-seed<seed>.json)")
     p.add_argument("--workers", type=int, default=os.cpu_count())
     args = p.parse_args()
-    out = args.out or f"fahrer-{args.track}-{args.method}-seed{args.seed}.json"
+    out = args.out or f"driver-{args.track}-{args.method}-seed{args.seed}.json"
 
     track = tracks.load(args.track)
     evo = Evolution(args.seed)
     start = json.load(open(args.init))["bestWeights"] if args.init else None
     log = []
-    print(f"{track.name} · {track.total * .2:.0f} m · {algorithm(args)} · {describe(args.grip, args.slide)} · Bewertung {scoring(args)[0]}\n")
+    print(f"{track.name} · {track.total * .2:.0f} m · {algorithm(args)} · {describe(args.grip, args.slide)} · scoring {scoring(args)[0]}\n")
     run = run_single if args.method == "single" else run_population
     best, last = run(args, track, evo, start, out, log)
-    # Abschlussfahrt des besten Fahrers mit eingefrorenen Gewichten – dient im Browser-Test
-    # (tests/regression.cjs) als Paritätsreferenz.
+    # Final run of the best driver with frozen weights – serves as the parity reference in the
+    # browser test (tests/regression.cjs).
     car, reason, _ = reference.drive(track, best["weights"], args.grip, args.slide)
     test = {"date": now(), "physics": describe(args.grip, args.slide), "algorithm": algorithm(args), "scoring": scoring(args)[0],
-            "trainedOn": track.name, "trainedAt": best["at"], "trackId": track.id, "course": track.name, "driver": "Python-Training",
+            "trainedOn": track.name, "trainedAt": best["at"], "trackId": track.id, "course": track.name, "driver": "Python training",
             "progressPercent": max(0, min(100, car.max / track.total * 100)), "time": car.time,
-            "completed": reason == "Runde geschafft!", "reason": reason, "weightsUnchanged": True}
+            "completed": reason == reference.LAP, "reason": reason, "weightsUnchanged": True}
     export(out, args, track, best, last, log[-2000:], [test])
-    print(f"\nGespeichert: {out}  →  im Browser „JSON-Stand laden“ oder: python3 replay.py {out}")
+    print(f"\nSaved: {out}  →  in the browser \"Load JSON state\" or: python3 replay.py {out}")
 
 
 if __name__ == "__main__":

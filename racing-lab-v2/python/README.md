@@ -1,107 +1,111 @@
 # Racing Lab · Python
 
-Dieselbe Simulation wie im Browser, in Python. Sie rechnet **bitgenau gleich** wie
-`sim.js`: Ein Fahrer fährt in beiden Welten exakt dieselbe Runde. Dadurch kannst du
-schnell in Python trainieren und das Ergebnis im Browser anschauen.
+The same simulation as in the browser, in Python. It computes **bit-for-bit identically** to
+`sim.js`: a driver drives exactly the same lap in both worlds. So you can train quickly in
+Python and watch the result in the browser.
 
-Benötigt nur Python 3 (ab 3.9), keine Zusatzpakete.
+Needs only Python 3 (3.9 or later), no extra packages.
 
-## Dateien
+## Files
 
-| Datei | Inhalt |
+| File | Content |
 | --- | --- |
-| `racinglab/tracks.py` | Strecken: Catmull-Rom-Kurven der Testkurse, Nürburgring aus `tracks/nuerburgring.json` |
-| `racinglab/reference.py` | Ein Wagen: Sensoren, Netz (`predict`), Fahrphysik, Fortschritt, Bewertung |
-| `racinglab/ga.py` | Genetischer Algorithmus: Elite, Turnier, Kreuzung, Mutation |
-| `train.py` | Training: Population (parallel auf allen CPU-Kernen) oder Einzelwagen wie v1 |
-| `replay.py` | Testfahrt mit eingefrorenen Gewichten auf allen Strecken |
-| `analyze.py` | Fahrstil: wie oft bremst und rutscht ein Fahrer, welches Tempo |
-| `tools/build_nuerburgring.py` | Rechnet die TUM-CSV in Simulationseinheiten um |
+| `racinglab/tracks.py` | Tracks: Catmull-Rom curves of the test tracks, Nürburgring from `tracks/nuerburgring.json` |
+| `racinglab/reference.py` | One car: sensors, network (`predict`), vehicle physics, progress, score |
+| `racinglab/ga.py` | Genetic algorithm: elite, tournament, crossover, mutation |
+| `train.py` | Training: population (parallel on all CPU cores) or single car as in v1 |
+| `replay.py` | Test run with frozen weights on all tracks |
+| `analyze.py` | Driving style: how often a driver brakes and slides, at what speed |
+| `tools/build_nuerburgring.py` | Converts the TUM CSV into simulation units |
 
-## Befehle
+## Commands
 
-Alle Befehle im Ordner `racing-lab-v2/python` ausführen.
+Run all commands in the folder `racing-lab-v2/python`.
 
-Fahrer auf Testkurs 01 trainieren (dauert etwa 15 s):
+Train a driver on test track 01 (takes about 15 s):
 
 ```bash
 python3 train.py --track training --generations 25 --seed 1
 ```
 
-Fahrer auf dem Nürburgring trainieren:
+Train a driver on the Nürburgring:
 
 ```bash
 python3 train.py --track nuerburgring --generations 40 --seed 1
 ```
 
-Standard ist Haftung 1,5 g mit Gleitreibung 70 % (v2.2). `--slide 1` entspricht v2.1.
-Ohne Haftungsgrenze, also Physik wie v1:
+The default is grip 1.5 g with 70 % sliding friction (v2.2). `--slide 1` corresponds to v2.1.
+Without a grip limit, i.e. physics as in v1:
 
 ```bash
 python3 train.py --track training --grip 0
 ```
 
-Einzelwagen wie in v1 (Hill Climbing: ein Wagen je Versuch, mutierte Kopie des Besten):
+Single car as in v1 (hill climbing: one car per attempt, mutated copy of the best):
 
 ```bash
 python3 train.py --method single --attempts 300 --grip 0
 ```
 
-Jede Fahrer-Datei hält im Kopf `meta` fest, wann, auf welcher Strecke, mit welcher Physik
-und mit welchem Verfahren trainiert wurde. Der Browser zeigt diese Angaben im Prüfprotokoll.
+Every driver file records in its `meta` header when, on which track, with which physics and
+with which method it was trained. The browser shows these details in the test log.
 
-Mit Abstandsregel in der Bewertung (seitlich unter 2,5 m zur Wand kostet Punkte):
+With the clearance rule in the score (less than 2.5 m to the wall at the side costs points):
 
 ```bash
 python3 train.py --grip 0 --clearance
 ```
 
-Mit Lenkruhe (jede Lenkänderung kostet Punkte), auch kombiniert mit der Abstandsregel:
+With steering calm (every steering change costs points), also combined with the clearance rule:
 
 ```bash
 python3 train.py --grip 0 --calm
 python3 train.py --grip 0 --clearance --calm
 ```
 
-Mit Vorwissen starten, also vom Fahrer aus Testkurs 01 aus weitertrainieren:
+Start with prior knowledge, i.e. continue training from the test-track-01 driver:
 
 ```bash
 python3 train.py --track nuerburgring --init ../../racing-training.json
 ```
 
-Einen Fahrer auf allen Strecken prüfen:
+Test a driver on all tracks:
 
 ```bash
-python3 replay.py ../fahrer/fahrer-nuerburgring-seed1.json
+python3 replay.py ../drivers/driver-nuerburgring-seed1.json
 ```
 
-Die erzeugte JSON-Datei lädst du im Browser über **JSON-Stand laden**. Die Datei
-weiß, auf welcher Strecke sie trainiert wurde, und landet beim passenden Fahrer.
+Analyse the driving style of all drivers:
 
-## So hängt der Code zusammen
+```bash
+python3 analyze.py ../drivers/*.json
+```
+
+Load the generated JSON file in the browser with **Load JSON state**. The file knows which
+track it was trained on and ends up with the matching driver.
+
+## How the code fits together
 
 ```text
 train.py
-  └─ Evolution.first_generation()      40 Netze (Zufall oder Startfahrer)
-  └─ je Generation:
-       pool.map(evaluate)               jeder Wagen fährt einen Versuch
+  └─ Evolution.first_generation()      40 networks (random or starting driver)
+  └─ per generation:
+       pool.map(evaluate)               every car drives one attempt
          └─ reference.drive()
-              └─ advance()  ×N          sense → predict → Physik → Fortschritt
-       Evolution.next_generation()      Bester + Elite + Zuwanderer + Kinder
-       export()                         JSON für den Browser
+              └─ advance()  ×N          sense → predict → physics → progress
+       Evolution.next_generation()      best + elite + immigrants + children
+       export()                         JSON for the browser
 ```
 
-## Gleicher Seed, gleiches Ergebnis
+## Same seed, same result
 
-`--seed` legt den Zufall fest. Mit gleichem Seed und gleicher Population ergibt
-`train.py` dieselben Generationen. Das ist die Voraussetzung für faire Vergleiche,
-etwa „40 gegen 80 Wagen“: Ändere pro Experiment nur eine Größe und vergleiche
-mehrere Seeds.
+`--seed` fixes the randomness. With the same seed and the same population, `train.py`
+produces the same generations. That is the precondition for fair comparisons such as
+"40 vs. 80 cars": change only one variable per experiment and compare several seeds.
 
-## Später: Reinforcement Learning (PPO)
+## Later: reinforcement learning (PPO)
 
-`reference.advance()` ist bereits das, was eine RL-Umgebung braucht: Beobachtung
-(9 Zahlen) rein, Aktion (2 Zahlen) raus, Belohnung (Änderung des Fortschritts)
-und Ende (Wand, Runde, Zeit). Ein `gymnasium.Env` darum herum plus
-`stable-baselines3` (PPO) wäre der nächste Schritt. Dafür werden dann PyTorch und
-diese beiden Pakete benötigt.
+`reference.advance()` already is what an RL environment needs: observation (9 numbers) in,
+action (2 numbers) out, reward (change in progress) and termination (wall, lap, time).
+A `gymnasium.Env` around it plus `stable-baselines3` (PPO) would be the next step. That
+needs PyTorch and these two packages.

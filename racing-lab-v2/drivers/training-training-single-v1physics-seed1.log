@@ -1,0 +1,22 @@
+Test track 01 · Training track · 540 m · Single car (hill climbing) · Python, seed 1 · no grip limit (v1)
+
+attempt      Score  distance    time  result
+      1       56.3     2.1%    1.55s  Wall contact · improvement
+      3       59.8     2.3%    1.70s  Wall contact · improvement
+      4       78.8     3.0%    2.02s  Wall contact · improvement
+      5     1147.6    42.7%    8.08s  Wall contact · improvement
+     12     1178.6    43.9%    8.30s  Wall contact · improvement
+     40     1366.8    50.9%    9.47s  Wall contact · improvement
+     45     1383.0    51.5%    9.57s  Wall contact · improvement
+     48     1405.9    52.3%    9.62s  Wall contact · improvement
+     50     1424.9    53.0%    9.42s  Wall contact · improvement
+     54     3188.5   100.0%   16.45s  Lap completed! · improvement
+     63     3188.6   100.0%   16.35s  Lap completed! · improvement
+     84     3188.6   100.0%   16.32s  Lap completed! · improvement
+     90     3188.6   100.0%   16.23s  Lap completed! · improvement
+    143     3188.7   100.0%   16.22s  Lap completed! · improvement
+    162     3188.7   100.0%   16.15s  Lap completed! · improvement
+    174     3188.8   100.0%   16.05s  Lap completed! · improvement
+… 300 attempts, 16 of them improvements
+
+Saved: ../drivers/driver-training-single-v1physik-seed1.json  →  in the browser "Load JSON state" or: python3 replay.py ../drivers/driver-training-single-v1physik-seed1.json

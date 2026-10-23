@@ -1,9 +1,9 @@
 .DS_Store
 __pycache__/
 *.pyc
-# ZIP ist nur die Lieferform von v1; der Inhalt liegt entpackt in racing-lab-quellcode/
+# The ZIP was only the delivery format of v1; its content is unpacked in racing-lab-quellcode/
 *.zip
 
-# Rohe Browser-Exporte (racing-*.json, oft >10 MB) bleiben lokal.
-# Ins Repo kommen nur schlanke Kopien (fahrer-*.json).
-racing-lab-v2/fahrer/racing-*.json
+# Raw browser exports (racing-*.json, often >10 MB) stay local.
+# Only slim copies (driver-*.json) go into the repository.
+racing-lab-v2/drivers/racing-*.json

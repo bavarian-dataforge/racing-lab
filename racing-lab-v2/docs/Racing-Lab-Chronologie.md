@@ -185,7 +185,7 @@ Das Paket enthält die ausführbare Oberfläche, den Simulationscode, Startanlei
   - Flos v1-Fahrer fährt in v2 und Python exakt dieselben Zeiten wie im v1-Protokoll.
   - Derselbe Fahrer schafft ohne Nachlernen den Nürburgring: 151,72 s.
   - GA in Python, Seed 1: Testkurs 01 ab Generation 6, Nürburgring von Null ab Generation 8 (Endstand 151,00 s).
-  - Die GA-Fahrer sind auf ihrer Strecke schneller, scheitern aber auf mehreren Prüfstrecken (Details in `Validierung.md`).
+  - Die GA-Fahrer sind auf ihrer Strecke schneller, scheitern aber auf mehreren Prüfstrecken (Details in `validation.md`).
 - **Erkenntnisse:**
   - Schnell auf einer Strecke heißt nicht vielseitig. Das ist Überanpassung.
   - Ohne Reifenhaftung muss der Wagen nie bremsen. Der Nürburgring ist im Modell leichter als in echt.
@@ -238,7 +238,7 @@ Das Paket enthält die ausführbare Oberfläche, den Simulationscode, Startanlei
 ## 17. v2.5: README mit Bildern
 
 - **Ziel (Flo):** Wer auf GitHub landet, soll sofort sehen, worum es geht.
-- **Umsetzung:** Vier Bilder in `docs/bilder/`: Population beim Lernen, Nürburgring mit
+- **Umsetzung:** Vier Bilder in `docs/bilder/` (seit v3.0 `docs/images/`): Population beim Lernen, Nürburgring mit
   Telemetrie, Netz live, Prüfprotokoll. Sie werden reproduzierbar mit
   `node tools/screenshots.mjs` erzeugt (Chrome headless, keine Pakete). Die Start-README
   ist neu aufgebaut: Bild, Erklärung in drei Sätzen, Ablaufdiagramm, Verfahrensvergleich,
@@ -295,7 +295,7 @@ Das Paket enthält die ausführbare Oberfläche, den Simulationscode, Startanlei
   Schwingen bestrafen. Präzisierung: Den D-Anteil macht man dafür eher größer, er dämpft.
 - **Entscheidung:** Ruhiges Lenken über das Gütekriterium belohnen (Weg B), die Physik bleibt
   unverändert. Kennzahl Lenkweg Σ|ΔLenkung|, 2 Punkte je Einheit, kalibriert an vorhandenen
-  Fahrern. Begründung und Messwerte im Code (`reference.py`) und in `Validierung.md`.
+  Fahrern. Begründung und Messwerte im Code (`reference.py`) und in `validation.md`.
 - **Ergebnis:** Abstandsregel + Lenkruhe: alle drei Fahrer schaffen den Nürburgring, zwei alle
   fünf Prüfstrecken. Lenkweg 53 → 8. Kosten: rund 1,3 s pro Runde auf Testkurs 01.
 - **Erkenntnis:** Was dem Netz fehlte, war kein besseres Verfahren und kein längeres Training,
@@ -312,6 +312,23 @@ Das Paket enthält die ausführbare Oberfläche, den Simulationscode, Startanlei
 - **Weiterhin offen:** Bremsen lernt keiner. Die Fahrer wählen ein gleichmäßig vorsichtiges Tempo.
   Unklar ist, ob die Abstandsregel unter Haftung schadet (im Einzelvergleich 2/6 statt 5/6).
   Klärung per Python-Experiment mit mehreren Seeds.
+
+## 23. v3.0: Repository auf Englisch
+
+- **Anlass (Flo):** Auf GitHub ist fast alles auf Englisch. Das Repository soll es auch sein.
+- **Umsetzung:** README, Doku, Code-Kommentare, Python-Ausgaben und Commit-Nachrichten auf
+  Englisch. Die Oberfläche ist zweisprachig (EN/DE oben rechts umschaltbar, Standard nach
+  Browsersprache). Ordner und Dateien umbenannt: `fahrer/` → `drivers/`, `fahrer-*` → `driver-*`,
+  `Validierung.md` → `validation.md`, `Technik-und-Grenzen.md` → `technical-notes.md`,
+  `docs/bilder/` → `docs/images/` (deutsche Bilder in `docs/images/de/`). Die deutsche README
+  liegt als `README.de.md` daneben.
+- **Bewusst deutsch geblieben:** v1 in `racing-lab-quellcode/` (historischer Stand), diese
+  Chronologie und die Datenkennungen der Bewertung (`abstand`, `ruhe`), damit alte Exporte
+  weiter funktionieren.
+- **Kompatibilität:** Alte Exporte mit deutschen Texten (`Runde geschafft!`, `Wandkontakt`, …)
+  werden beim Laden auf die englischen Kennungen abgebildet, im Browser und in Python.
+- **Prüfung:** Alle Zahlen unverändert. Parität Browser ↔ Python für alle Fahrerdateien
+  bestanden, Sprachwechsel im Test abgedeckt.
 
 ## Technische Vereinfachungen
 

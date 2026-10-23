@@ -1,37 +1,38 @@
-# Lizenzen und Quellen
+# Licenses and sources
 
-## Eigener Code und eigene Inhalte – MIT
+## Own code and content – MIT
 
-Alles in diesem Repository steht unter der MIT-Lizenz (`LICENSE`), **außer** den unten
-genannten Streckendaten. Das gilt für Quellcode (JavaScript, HTML, CSS, Python), Tests,
-Dokumentation, die Testkurse 01–05 und die trainierten Fahrer (`*.json` mit Netzgewichten).
+Everything in this repository is under the MIT license (`LICENSE`), **except** the track
+data listed below. This covers source code (JavaScript, HTML, CSS, Python), tests,
+documentation, test tracks 01–05 and the trained drivers (`*.json` with network weights).
 
-## Streckendaten Nürburgring – LGPL-3.0
+## Nürburgring track data – LGPL-3.0
 
-| Datei | Inhalt |
+| File | Content |
 | --- | --- |
-| `racing-lab-v2/data/Nuerburgring.csv` | unverändertes Original |
-| `racing-lab-v2/tracks/nuerburgring.json` | Bearbeitung: gespiegelt, um 84° gedreht, in 0,2-m-Einheiten umgerechnet |
-| `racing-lab-v2/tracks/nuerburgring.js` | dieselbe Bearbeitung als JavaScript-Datei für den Browser |
+| `racing-lab-v2/data/Nuerburgring.csv` | unmodified original |
+| `racing-lab-v2/tracks/nuerburgring.json` | modified: mirrored, rotated by 84°, converted to 0.2 m units |
+| `racing-lab-v2/tracks/nuerburgring.js` | the same modification as a JavaScript file for the browser |
 
-- **Quelle:** TUMFTM racetrack-database, Lehrstuhl für Fahrzeugtechnik, Technische
-  Universität München – <https://github.com/TUMFTM/racetrack-database>, Datei `tracks/Nuerburgring.csv`.
-- **Lizenz:** GNU Lesser General Public License v3.0 (`LICENSES/LGPL-3.0.txt`, die LGPL
-  ergänzt die GPL-3.0: `LICENSES/GPL-3.0.txt`). Die bearbeiteten Dateien stehen ebenfalls
-  unter LGPL-3.0. Das Umrechnungsskript `racing-lab-v2/python/tools/build_nuerburgring.py`
-  ist eigener Code (MIT) und macht die Bearbeitung nachvollziehbar.
-- **Herkunft laut TUMFTM:** Mittellinie aus OpenStreetMap-GPS-Punkten (geglättet),
-  Streckenbreiten aus Satellitenbildern. Kartendaten © OpenStreetMap-Mitwirkende
+- **Source:** TUMFTM racetrack-database, Chair of Automotive Technology, Technical
+  University of Munich – <https://github.com/TUMFTM/racetrack-database>, file `tracks/Nuerburgring.csv`.
+- **License:** GNU Lesser General Public License v3.0 (`LICENSES/LGPL-3.0.txt`; the LGPL
+  supplements the GPL-3.0: `LICENSES/GPL-3.0.txt`). The modified files are also under
+  LGPL-3.0. The conversion script `racing-lab-v2/python/tools/build_nuerburgring.py`
+  is own code (MIT) and makes the modification reproducible.
+- **Origin according to TUMFTM:** centre line from OpenStreetMap GPS points (smoothed),
+  track widths from satellite images. Map data © OpenStreetMap contributors
   (<https://www.openstreetmap.org/copyright>).
 
-Das Bild `docs/bilder/02-nuerburgring.png` zeigt eine Darstellung dieser Daten. Die Quellenangabe oben gilt auch dafür.
+The images `docs/images/02-nuerburgring.png` and `docs/images/de/02-nuerburgring.png` show a
+rendering of this data. The attribution above applies to them as well.
 
-Die Simulation liest diese Daten nur ein. Der MIT-lizenzierte Code wird dadurch nicht
-zu LGPL-Code.
+The simulation only reads this data. The MIT-licensed code does not become LGPL code
+as a result.
 
-## Name „Nürburgring“
+## The name "Nürburgring"
 
-„Nürburgring“ ist eine eingetragene Marke. Der Name wird hier nur beschreibend
-verwendet: Die Strecke bildet den Verlauf der GP-Strecke nach. Racing Lab ist ein
-privates, nicht-kommerzielles Lernprojekt und steht in keiner Verbindung zur
-Nürburgring 1927 GmbH & Co. KG oder anderen Rechteinhabern.
+"Nürburgring" is a registered trademark. The name is used here descriptively only: the
+track follows the layout of the GP circuit. Racing Lab is a private, non-commercial
+learning project and has no connection to Nürburgring 1927 GmbH & Co. KG or any other
+rights holder.

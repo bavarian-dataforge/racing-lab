@@ -1,15 +1,15 @@
-"""Genetischer Algorithmus – dieselben Bausteine wie im Browser (sim.js, evolve)."""
+"""Genetic algorithm – the same building blocks as in the browser (sim.js, evolve)."""
 import random
 
 from .reference import N_WEIGHTS
 
-ELITE = 4          # beste Netze unverändert übernehmen
-IMMIGRANTS = 2     # komplett neue Zufallsnetze je Generation (Vielfalt)
-TOURNAMENT = 3     # Turniergröße bei der Elternwahl
-GENE_RATE = .15    # Anteil der Gewichte, die ein Kind mutiert
+ELITE = 4          # best networks are kept unchanged
+IMMIGRANTS = 2     # completely new random networks per generation (diversity)
+TOURNAMENT = 3     # tournament size when choosing parents
+GENE_RATE = .15    # share of weights a child mutates
 
-# Ein "Gen" ist ein ganzes Neuron: Bias + eingehende Gewichte.
-# So bleiben zusammenarbeitende Gewichte beim Kreuzen beisammen.
+# A "gene" is a whole neuron: bias + incoming weights.
+# This keeps weights that work together in one piece during crossover.
 BLOCKS = [(j * 10, j * 10 + 10) for j in range(10)] + [(100, 111), (111, 122)]
 
 
@@ -24,18 +24,18 @@ class Evolution:
         return [self.rand() * .8 for _ in range(N_WEIGHTS)]
 
     def mutate(self, w, rate=GENE_RATE):
-        # meist kleine Schritte (±0,12…0,32), gelegentlich ein großer Sprung (±0,7)
+        # mostly small steps (±0.12…0.32), occasionally a big jump (±0.7)
         scale = .7 if self.rng.random() < .1 else .12 + self.rng.random() * .2
         return [v + self.rand() * scale if self.rng.random() < rate else v for v in w]
 
     def mutate_v1(self, w):
-        """Mutation wie im v1-Einzelwagen: 65 % der Gewichte ändern sich,
-        in 12 % der Fälle mit großem Schritt (±0,7)."""
+        """Mutation as in the v1 single car: 65 % of the weights change,
+        in 12 % of cases with a big step (±0.7)."""
         scale = .7 if self.rng.random() < .12 else .12 + self.rng.random() * .2
         return [v + self.rand() * scale if self.rng.random() < .65 else v for v in w]
 
     def next_single(self, best_ever):
-        """Hill Climbing (v1): meist eine mutierte Kopie des Besten, in 5 % ein Neustart."""
+        """Hill climbing (v1): usually a mutated copy of the best, a fresh start in 5 %."""
         return self.fresh() if self.rng.random() < .05 else self.mutate_v1(best_ever)
 
     def crossover(self, a, b):
@@ -54,7 +54,7 @@ class Evolution:
         return [start[:]] + [self.mutate(start) for _ in range(size - 1)]
 
     def next_generation(self, results, best_ever, size):
-        """results: Liste (Score, Gewichte). Gibt die neuen Gewichte zurück."""
+        """results: list of (score, weights). Returns the new weights."""
         ranked = sorted(results, key=lambda r: r[0], reverse=True)
         nxt = [best_ever[:]]
         for _, w in ranked:

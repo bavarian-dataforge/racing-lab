@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
-  "description": "Ein sichtbares Lernexperiment mit einem neuronalen Fahrer und fünf Testkursen.",
-  "scripts": {"test": "node tests/regression.cjs"}
+  "description": "A visible learning experiment: a small neural network learns to drive, trained by neuroevolution.",
+  "scripts": {
+    "test": "node tests/regression.cjs"
+  }
 }
