@@ -15,6 +15,8 @@ Neu in v2:
 - **Python-Version** in `python/`, bitgenau gleich wie der Browser (siehe `python/README.md`).
 - **Haftungsgrenze (v2.1):** Kammscher Kreis mit 1,5 g. Zu schnelle Wagen rutschen in Kurven
   nach außen, Bremsen wird wichtig. Umschaltbar auf die v1-Physik ohne Grenze.
+- **Gleitreibung (v2.2):** Wer rutscht, hat nur noch 70 % Haftung (Kontrollverlust).
+  Drei Physik-Varianten wählbar: v2.2 (Standard), v2.1, v1.
 - Bewertungsfehler behoben: Der Fortschritt zählt höchstens eine Runde (Details in `docs/Technik-und-Grenzen.md`).
 
 Physik, Sensoren, Netz (9–10–2) und Gewichtsformat sind identisch mit v1. Ein in v1
@@ -35,12 +37,13 @@ Danach <http://127.0.0.1:8000> öffnen.
 | Element | Verhalten |
 | --- | --- |
 | Fahrer | Welcher Fahrer aktiv ist. Training nur, wenn Strecke = Trainingsstrecke des Fahrers. |
-| Physik | mit Haftungsgrenze 1,5 g oder ohne (v1); eigene Fahrerstände je Physik |
+| Physik | Haftung + Gleitreibung (v2.2), Haftung ohne Gleitreibung (v2.1) oder ohne Grenze (v1); eigene Fahrerstände je Physik |
 | Lernverfahren | Population (genetischer Algorithmus) oder Einzelwagen wie in v1 |
 | Wagen | Populationsgröße 20 / 40 / 80; gilt ab dem nächsten Trainingsstart |
 | Zeitraffer | zusätzlich 120×; die Rechenzeit je Bild ist begrenzt, die Seite bleibt bedienbar |
 | Kamera am Wagen | folgt dem führenden Wagen (größter Fortschritt in der laufenden Generation) |
 | Neu beginnen | löscht nur den Stand des aktiven Fahrers |
+| Prüfprotokoll / Export | jede Zeile mit Datum, Strecke, Fahrer, Physik und Lernverfahren; JSON-Kopf `meta` mit denselben Angaben |
 
 ## Dateien
 

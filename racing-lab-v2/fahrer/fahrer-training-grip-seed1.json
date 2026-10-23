@@ -1,6 +1,14 @@
 {
  "formatVersion": 1,
  "app": "racing-lab-v2-python",
+ "meta": {
+  "exportedAt": "2026-10-23T07:18:18Z",
+  "trainingTrack": "Testkurs 01 \u00b7 Trainingsstrecke",
+  "physics": "mit Haftung 1,5 g ohne Gleitreibung",
+  "algorithm": "Population (genetischer Algorithmus) \u00b7 40 Wagen \u00b7 Python, Seed 1",
+  "trainedAt": "2026-10-23T06:51:51Z",
+  "note": "Kopf nachtr\u00e4glich erg\u00e4nzt; trainedAt = Dateidatum"
+ },
  "algorithm": "genetic algorithm: elitism, tournament selection, neuron-block crossover, mutation",
  "population": 40,
  "generation": 60,
@@ -698,7 +706,12 @@
    "time": 24.516666666666556,
    "completed": true,
    "reason": "Runde geschafft!",
-   "weightsUnchanged": true
+   "weightsUnchanged": true,
+   "date": "2026-10-23T06:51:51Z",
+   "physics": "mit Haftung 1,5 g ohne Gleitreibung",
+   "algorithm": "Population (genetischer Algorithmus) \u00b7 40 Wagen \u00b7 Python, Seed 1",
+   "trainedOn": "Testkurs 01 \u00b7 Trainingsstrecke",
+   "trainedAt": "2026-10-23T06:51:51Z"
   }
  ]
 }

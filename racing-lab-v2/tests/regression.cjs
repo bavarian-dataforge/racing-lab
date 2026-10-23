@@ -24,7 +24,7 @@ function boot() {
     }),
     set: (obj, field, value) => (obj[field] = value, true),
   });
-  const defaults = {rate: '1', popSize: '40', method: 'population', driver: 'training', physics: 'grip'};
+  const defaults = {rate: '1', popSize: '40', method: 'population', driver: 'training', physics: 'slide'};
   const el = id => elements[id] ??= {
     getContext: () => context, checked: true, style: {}, options: [],
     value: defaults[id] ?? 'training', textContent: '', attributes: {},
@@ -105,6 +105,13 @@ async function run() {
   el('exportLog').onclick();
   const data = JSON.parse(await exported.text());
   assert.equal(data.trainingTrackId, 'training');
+  // Protokollangaben: Datum, Trainingsstrecke, Physik, Lernverfahren
+  assert.equal(data.meta.trainingTrack, 'Testkurs 01 · Trainingsstrecke');
+  assert.equal(data.meta.physics, 'ohne Haftungsgrenze (v1)');
+  assert(/^\d{4}-\d\d-\d\dT/.test(data.meta.exportedAt));
+  const lastTest = data.testResults.at(-1);
+  for (const k of ['date', 'physics', 'algorithm', 'trainedOn']) assert(lastTest[k], 'Testprotokoll ohne ' + k);
+  assert(/\d{4}-\d\d-\d\d \d\d:\d\d \| /.test(el('transferResults').textContent), 'Protokollzeile ohne Datum');
   assert.equal(data.courseProfiles.length, 6);
 
   // 3) Population: eine Generation mit 40 Wagen läuft durch und erzeugt die nächste.
@@ -143,14 +150,15 @@ async function run() {
   same(lab.stats().incumbent && lab.stats().incumbent.length, 122);
 
   // 6) Haftungsgrenze: eigene Fahrerstände je Physik, Training läuft.
-  lab.switchPhysics('grip');
-  assert.equal(lab.stats().physics, 'grip');
+  lab.switchPhysics('slide');
+  assert.equal(lab.stats().physics, 'slide');
   assert.equal(lab.stats().incumbent, undefined);
   lab.switchCourse('training');
   el('toggle').onclick();
   runUntil(lab, () => lab.stats().generation > 1, 20000);
   assert.equal(lab.stats().generation, 2);
-  assert(saved.has('racing-lab-v2-driver-training-grip'));
+  assert(saved.has('racing-lab-v2-driver-training-slide'));
+  assert(!saved.has('racing-lab-v2-driver-training-grip'));
   render();
   lab.switchPhysics('v1');
   assert.equal(lab.stats().bestScore >= baseline.bestScore, true);
@@ -169,7 +177,8 @@ async function run() {
     const ref = (data.testResults || []).at(-1);
     if (!ref) continue;
     await load(reloaded.el, data);
-    assert.equal(reloaded.lab.stats().physics, data.physics?.model === 'kamm' ? 'grip' : 'v1', f);
+    const want = data.physics?.model !== 'kamm' ? 'v1' : (data.physics.slide ?? 1) === 1 ? 'grip' : 'slide';
+    assert.equal(reloaded.lab.stats().physics, want, f);
     reloaded.lab.switchCourse(ref.trackId); reloaded.lab.beginTest();
     runUntil(reloaded.lab, () => !reloaded.lab.stats().running, 60000);
     const got = reloaded.lab.stats().testResults.at(-1);

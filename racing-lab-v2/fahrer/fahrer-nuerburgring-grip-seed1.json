@@ -1,6 +1,14 @@
 {
  "formatVersion": 1,
  "app": "racing-lab-v2-python",
+ "meta": {
+  "exportedAt": "2026-10-23T07:18:18Z",
+  "trainingTrack": "N\u00fcrburgring \u00b7 GP-Strecke",
+  "physics": "mit Haftung 1,5 g ohne Gleitreibung",
+  "algorithm": "Population (genetischer Algorithmus) \u00b7 40 Wagen \u00b7 Python, Seed 1",
+  "trainedAt": "2026-10-23T06:55:19Z",
+  "note": "Kopf nachtr\u00e4glich erg\u00e4nzt; trainedAt = Dateidatum"
+ },
  "algorithm": "genetic algorithm: elitism, tournament selection, neuron-block crossover, mutation",
  "population": 40,
  "generation": 80,
@@ -878,7 +886,12 @@
    "time": 177.46666666670004,
    "completed": true,
    "reason": "Runde geschafft!",
-   "weightsUnchanged": true
+   "weightsUnchanged": true,
+   "date": "2026-10-23T06:55:19Z",
+   "physics": "mit Haftung 1,5 g ohne Gleitreibung",
+   "algorithm": "Population (genetischer Algorithmus) \u00b7 40 Wagen \u00b7 Python, Seed 1",
+   "trainedOn": "N\u00fcrburgring \u00b7 GP-Strecke",
+   "trainedAt": "2026-10-23T06:55:19Z"
   }
  ]
 }

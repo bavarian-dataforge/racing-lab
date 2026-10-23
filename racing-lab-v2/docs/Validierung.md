@@ -107,3 +107,40 @@ setzt es gezielt als Bremse ein (Drift). Das ist im Modell erlaubt, weil Rutsche
 kostet und keinen Kontrollverlust bedeutet. Wer echtes Bremsverhalten erzwingen will,
 müsste Rutschen teurer machen, z. B. durch Abzug im Score, Drehen des Wagens oder
 weniger Seitenführung beim Rutschen. Das ist eine bewusste Modellentscheidung für später.
+
+## v2.2 · Gleitreibung (Kontrollverlust beim Rutschen)
+
+Experiment auf Testkurs 01: nur die Gleitreibung variiert, je 3 Seeds, 40 Wagen,
+60 Generationen. Die Dateien liegen in `fahrer/experiment-gleitreibung/`, ausgewertet mit
+`python3 analyze.py`.
+
+| Gleitreibung | Rundenzeit | bremst (Pedal < 0) | rutscht | Höchsttempo |
+| --- | --- | --- | --- | --- |
+| 100 % (= v2.1) | 22,6–24,5 s | 0–5 % | 46–47 % | 122 km/h |
+| 85 % | 25,0–25,7 s | 0 % | 43–48 % | 98–122 km/h |
+| 70 % (v2.2) | 27,0–29,1 s | 0–0,7 % | 34–60 % | 92–98 km/h |
+| 55 % | 28,9–31,4 s | 0–15 % | 33–67 % | 87–97 km/h |
+
+**Ergebnis:** Kontrollverlust macht Rutschen teurer, und die Runden werden langsamer.
+Bremsen mit dem Pedal lernen die Fahrer dadurch aber **nicht**. Sie wählen eine
+einfachere Strategie: Sie fahren nicht mehr so schnell, dass Bremsen nötig wäre (Höchsttempo
+sinkt von 122 auf ~95 km/h), und regulieren das Tempo über Gaswegnehmen und Rutschen.
+Nur ein Lauf (55 %, Seed 3) bremst nennenswert (15 %).
+
+Mögliche Gründe: Das Netz „sieht“ das Rutschen nicht direkt, es hat nur Tempo, Drehrate und
+Abstände als Eingänge. Außerdem bleibt die Strategie „gleichmäßig langsam“ für den
+genetischen Algorithmus leichter zu finden als „spät bremsen, schnell einlenken“.
+
+Für v2.2 gilt Gleitreibung = 70 %. Fahrer: `fahrer/fahrer-training-slide-seed1.json`
+(27,33 s) und `fahrer/fahrer-nuerburgring-slide-seed1.json`.
+
+| Nürburgring (80 Gen., Seed 1) | erste Runde | Endzeit | bremst | davon kräftig (< −0,5) | rutscht | Tempo |
+| --- | --- | --- | --- | --- | --- | --- |
+| v2.1 ohne Gleitreibung | Gen. 9 | 177,47 s | 1,7 % | 0 % | 12,0 % | 42–122 km/h |
+| v2.2 Gleitreibung 70 % | Gen. 13 | 197,92 s | 4,1 % | 2,6 % | 12,9 % | 37–106 km/h |
+
+Auf dem Nürburgring mit seinen langen Geraden bremst der v2.2-Fahrer etwas mehr und auch
+kräftiger. Der Hauptunterschied bleibt aber das niedrigere Höchsttempo.
+
+Alle vier Fahrer mit Haftung fahren im Browser-Code exakt ihre Python-Zeiten.
+

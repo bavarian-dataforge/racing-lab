@@ -12,6 +12,7 @@ jeweils von −1 bis +1.
 | **v1.0** | `racing-lab-quellcode/` | Ein Wagen, Hill Climbing (Mutation des besten Netzes), fünf Testkurse |
 | **v2.0** | `racing-lab-v2/` | Population mit genetischem Algorithmus, Nürburgring GP maßstäblich, Python-Version, Bewertungsfehler behoben |
 | **v2.1** | `racing-lab-v2/` | Haftungsgrenze (Kammscher Kreis, 1,5 g): Rutschen in Kurven, Bremsen wird nötig. v1-Physik umschaltbar |
+| **v2.2** | `racing-lab-v2/` | Gleitreibung: Rutschen kostet Haftung (Kontrollverlust). Experiment zeigt: Fahrer werden langsamer statt zu bremsen. `analyze.py` für Fahrstil |
 
 Jede Stufe hat ein Git-Tag (`git tag -n`). Ältere Ordner bleiben unverändert, damit
 Vergleiche reproduzierbar sind. Die Änderungen sind in den Commits nachvollziehbar.

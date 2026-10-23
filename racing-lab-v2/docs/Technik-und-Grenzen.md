@@ -101,6 +101,30 @@ Das Netz „spürt“ das Rutschen nur indirekt über Drehrate und Tempo.
 
 Messwerte und Beobachtungen stehen in `Validierung.md`.
 
+## Gleitreibung / Kontrollverlust (v2.2)
+
+In v2.1 kostete Rutschen nur Tempo. Die gelernten Fahrer nutzten es deshalb als Bremse,
+bremsten selten mit dem Pedal und rutschten bis zu 46 % der Fahrzeit. v2.2 bildet nach,
+dass ein rutschender Reifen weniger hält als ein haftender (Gleitreibung < Haftreibung):
+
+```text
+Grenze = µ·g                 solange der Wagen haftet
+Grenze = 0,7 · µ·g            sobald er im vorigen Zeitschritt gerutscht ist (SLIDE = 0,7)
+```
+
+Die kleinere Grenze gilt für Seitenführung **und** Bremsen. Wer einmal rutscht, kommt
+deshalb weiter nach außen und kann schlechter bremsen. Haftung bekommt er erst zurück,
+wenn Tempo × Drehrate wieder unter die Gleitgrenze fällt (Hysterese). Mit SLIDE = 1
+rechnet der Code exakt wie v2.1. Das ist durch Parität geprüft.
+
+Physik-Auswahl im Browser: „Haftung 1,5 g + Gleitreibung (v2.2)“ (Standard), „… ohne
+Gleitreibung (v2.1)“, „ohne Haftungsgrenze (v1)“. Jede Variante hat eigene Fahrerstände.
+JSON: `physics: {model: "kamm", grip: 1.5, slide: …}`. Python: `--slide` in `train.py`,
+`replay.py`, `analyze.py`.
+
+Einen Score-Abzug fürs Rutschen gibt es bewusst nicht. Ein Abzug würde nur das Symptom
+bestrafen, die Physik dagegen macht Rutschen von selbst unattraktiv.
+
 ## Weitere Grenzen
 
 - Alle Wagen starten identisch. Robustheit gegen andere Startbedingungen wird nicht trainiert.

@@ -209,6 +209,17 @@ Das Paket enthält die ausführbare Oberfläche, den Simulationscode, Startanlei
   - [ ] Rutschen teurer machen (Score-Abzug oder Kontrollverlust) und erneut vergleichen.
   - [ ] Rutschen als zusätzlichen Netzeingang prüfen (ändert die Architektur).
 
+## 14. v2.2: Gleitreibung und Protokollangaben
+
+- **Ziel:** Rutschen teurer machen, damit Bremsen gelernt wird. Außerdem soll jedes Protokoll festhalten, wann, wo, mit welcher Physik und mit welchem Verfahren gelernt wurde.
+- **Änderungen:**
+  - Gleitreibung 70 %: Wer rutscht, hat nur noch 70 % der Haftung, für Kurve und Bremse (Kontrollverlust). Drei Physik-Varianten wählbar: v2.2, v2.1, v1.
+  - Protokoll: JSON-Kopf `meta` (Exportdatum, Trainingsstrecke, Physik, Lernverfahren, Trainingsdatum). Jede Prüfzeile nennt Datum, Strecke, Fahrer, Physik und Verfahren. CSV mit denselben Spalten (Semikolon, öffnet direkt in Excel). Dateinamen enthalten Strecke, Physik und Datum.
+  - `python/analyze.py` misst den Fahrstil: Bremsen, Rutschen, Tempo.
+- **Beobachtungen:** Das Experiment mit 4 Gleitreibungswerten × 3 Seeds zeigt: Die Fahrer werden langsamer, bremsen aber kaum mehr. Auf dem Nürburgring steigt der Bremsanteil leicht (1,7 % → 4,1 %).
+- **Erkenntnis:** Das Netz findet lieber „gleichmäßig langsam“ als „spät bremsen“. Mehr Physik macht die Demo nicht verständlicher.
+- **Richtungsentscheidung (Flo):** Der Fokus liegt auf dem Verständnis des neuronalen Netzes und einer LinkedIn-Demo. Weitere Physik-Erweiterungen nur nach Rückfrage.
+
 ## Technische Vereinfachungen
 
 Das Fahrzeug verwendet ein vereinfachtes kinematisches Modell mit Lenkung, Beschleunigen, Bremsen und geschwindigkeitsabhängigem Widerstand. Es werden keine Federung, Dämpfung, Reifenschlupf, Motorkennfelder oder Drehzahl simuliert.

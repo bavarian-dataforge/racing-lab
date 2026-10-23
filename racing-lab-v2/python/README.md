@@ -15,6 +15,7 @@ Benötigt nur Python 3 (ab 3.9), keine Zusatzpakete.
 | `racinglab/ga.py` | Genetischer Algorithmus: Elite, Turnier, Kreuzung, Mutation |
 | `train.py` | Training einer Population, parallel auf allen CPU-Kernen |
 | `replay.py` | Testfahrt mit eingefrorenen Gewichten auf allen Strecken |
+| `analyze.py` | Fahrstil: wie oft bremst und rutscht ein Fahrer, welches Tempo |
 | `tools/build_nuerburgring.py` | Rechnet die TUM-CSV in Simulationseinheiten um |
 
 ## Befehle
@@ -33,7 +34,8 @@ Fahrer auf dem Nürburgring trainieren:
 python3 train.py --track nuerburgring --generations 40 --seed 1
 ```
 
-Ohne Haftungsgrenze, also Physik wie v1 (Standard ist `--grip 1.5`):
+Standard ist Haftung 1,5 g mit Gleitreibung 70 % (v2.2). `--slide 1` entspricht v2.1.
+Ohne Haftungsgrenze, also Physik wie v1:
 
 ```bash
 python3 train.py --track training --grip 0
