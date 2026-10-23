@@ -258,6 +258,19 @@ Das Paket enthält die ausführbare Oberfläche, den Simulationscode, Startanlei
   Runde in Generation 25, Rundenzeit 33,40 s. Python-Vergleich mit derselben Physik:
   Generation 12, 16 und 21 (Seeds 1–3).
 
+## 19. v2.7: 81 Generationen mehr, zwei Strecken weniger
+
+- **Beobachtung (Flo):** Der Fahrer mit 80 Wagen wurde von Generation 44 bis 125 weitertrainiert
+  und danach „schlechter“. Messung: 0,12 s schneller auf Testkurs 01, aber Testkurs 02 und 04
+  nicht mehr geschafft (3 → 1 von 5 Prüfstrecken). Das ist Überanpassung, und Generation 44
+  von Hand zu sichern war „Early Stopping“.
+- **Behoben:** „Bestzeit hier“ gehört jetzt zum aktuellen besten Fahrer und beginnt neu, sobald
+  er ersetzt wird. Vorher hätte die Anzeige noch Zeiten eines früheren Fahrers gezeigt.
+- **Behoben:** Die Skripte werden mit Versionskennung geladen (`sim.js?v=2.7`). Browser
+  nehmen nach einem Update so keine alte Fassung mehr aus dem Zwischenspeicher. Die
+  Browser-Exporte dieses Laufs stammen aus einer Fassung vor v2.6, vermutlich aus dem
+  ZIP-Download in `racing-lab-main`.
+
 ## Technische Vereinfachungen
 
 Das Fahrzeug verwendet ein vereinfachtes kinematisches Modell mit Lenkung, Beschleunigen, Bremsen und geschwindigkeitsabhängigem Widerstand. Es werden keine Federung, Dämpfung, Reifenschlupf, Motorkennfelder oder Drehzahl simuliert.

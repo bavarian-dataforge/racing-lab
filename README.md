@@ -103,6 +103,9 @@ Mehr dazu in [`racing-lab-v2/python/README.md`](racing-lab-v2/python/README.md).
 
 - **Schneller heißt nicht vielseitiger.** Fahrer, die auf einer Strecke länger trainiert und
   schneller wurden, scheiterten oft auf anderen. Das ist Überanpassung.
+- **Länger trainiert, schlechter auf neuen Strecken.** 81 Generationen mehr Training brachten
+  0,12 Sekunden auf der Trainingsstrecke und kosteten zwei Prüfstrecken
+  ([Messung](racing-lab-v2/docs/Validierung.md)).
 - **Der erste Fahrer war ein Glückstreffer.** Von 19 Fahrern, alle nur auf Testkurs 01
   trainiert, schaffte allein der allererste alle fünf Prüfstrecken. Die übrigen 18 schafften
   eine bis drei.
@@ -125,6 +128,7 @@ Mehr dazu in [`racing-lab-v2/python/README.md`](racing-lab-v2/python/README.md).
 | **v2.4** | MIT-Lizenz, Quellenangaben, Repository öffentlich |
 | **v2.5** | README mit Bildern; Aufnahmeskript `racing-lab-v2/tools/screenshots.mjs` |
 | **v2.6** | Rundenzeit live und Bestzeit je Strecke in der Telemetrie |
+| **v2.7** | Bestzeit gehört zum aktuellen besten Fahrer; Skripte mit Versionskennung gegen veraltete Browser-Zwischenspeicher |
 
 Jede Stufe hat ein Git-Tag. Die ausführliche Chronologie steht in
 [`racing-lab-v2/docs/Racing-Lab-Chronologie.md`](racing-lab-v2/docs/Racing-Lab-Chronologie.md).

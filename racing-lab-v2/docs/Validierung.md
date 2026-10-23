@@ -157,3 +157,23 @@ und v1-Physik:
 - Übertragbarkeit (eingefroren): Kurs 01 ✓, 02 ✗ 73 %, 03 ✓, 04 ✗ 23 %, 05 ✓, Nürburgring ✗ 8 %.
   Flos v1-Fahrer (16,60 s) schafft alle sechs. Auch hier gilt: schneller heißt nicht vielseitiger.
   Ein Einzellauf ist keine Statistik.
+
+## v2.7 · Länger trainiert, schlechter verallgemeinert (Browser, Flo)
+
+Population mit 80 Wagen, Physik wie v1, Testkurs 01. Derselbe Lauf wurde nach Generation 44
+und nach Generation 125 exportiert. Beide Fahrer liegen in `fahrer/`
+(`…-80wagen-2026-10-23.json` und `…-80wagen-gen125-2026-10-23.json`).
+
+| Strecke | Generation 44 | Generation 125 |
+| --- | --- | --- |
+| Testkurs 01 (Training) | ✓ 15,95 s | ✓ 15,83 s |
+| Testkurs 02 · Wechselkurven | ✓ 15,48 s | ✗ 73 % |
+| Testkurs 03 · Weite Bögen | ✓ 15,00 s | ✓ 14,92 s |
+| Testkurs 04 · Enge Kurven | ✓ 18,20 s | ✗ 23 % |
+| Testkurs 05 · Gegenrichtung | ✗ 49 % | ✗ 12 % |
+| Nürburgring | ✗ 23 % | ✗ 23 % |
+
+81 Generationen mehr Training brachten 0,12 s auf Testkurs 01 (Score 3188,82 → 3188,89,
+letzte Verbesserung in Generation 124) und kosteten zwei Prüfstrecken. Die Gewichte
+verschoben sich im Mittel um 0,14. Generation 44 ist der bessere Fahrer, Generation 125 der
+schnellere auf seiner Strecke. Beide Ergebnisse reproduziert `replay.py` exakt.

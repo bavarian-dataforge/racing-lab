@@ -80,10 +80,11 @@ const label=id=>courses[id].short||courses[id].name;
 const nowIso=()=>new Date().toISOString(),day=iso=>{const d=new Date(iso||NaN),p=n=>String(n).padStart(2,'0');return isNaN(d)?'Datum unbekannt':d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());},// Ortszeit
   algoLabel=()=>method==='single'?'Einzelwagen (Hill Climbing)':'Population (genetischer Algorithmus) · '+popSize+' Wagen';
 let origin={};// wie der aktuelle beste Fahrer entstanden ist: {date, algorithm}
-let bestLaps={};// beste Rundenzeit je Strecke (Sekunden) für diesen Fahrer und diese Physik
+let bestLaps={};// beste Rundenzeit je Strecke (Sekunden) des aktuellen besten Fahrers; beginnt neu, sobald er ersetzt wird
 const noteLap=(id,t)=>{if(Number.isFinite(t)&&!(bestLaps[id]<=t))bestLaps[id]=t;},secs=t=>t.toFixed(2)+' s',
-  lapsFrom=(tests,recs,trainId)=>{const out={};for(const r of tests||[])if(r&&r.completed&&courses[r.trackId]&&Number.isFinite(r.time)&&!(out[r.trackId]<=r.time))out[r.trackId]=r.time;
-    for(const r of recs||[])if(r&&r.reason==='Runde geschafft!'&&Number.isFinite(r.time)&&!(out[trainId]<=r.time))out[trainId]=r.time;return out;};
+  // Bestzeiten aus Protokollen nachbilden: nur Testfahrten dieses Fahrers (gleiches Trainingsdatum) und seine eigene Trainingsrunde
+  lapsFrom=(tests,recs,trainId,trainedAt)=>{const out={};for(const r of tests||[])if(r&&r.completed&&courses[r.trackId]&&Number.isFinite(r.time)&&(!trainedAt||!r.trainedAt||r.trainedAt===trainedAt)&&!(out[r.trackId]<=r.time))out[r.trackId]=r.time;
+    for(const r of recs||[])if(r&&r.improved&&r.reason==='Runde geschafft!'&&Number.isFinite(r.time)&&!(out[trainId]<=r.time))out[trainId]=r.time;return out;};
 
 function saveCheckpoint(){
   if(!incumbent)return;
@@ -95,7 +96,7 @@ function restoreCheckpoint(id){
   clearState();
   try{let raw=store.get(keys.driver(id)),fromV1=false;if(!raw&&id==='training'&&physics==='v1'){raw=store.get(keys.v1);fromV1=!!raw;}if(!raw)return false;const data=JSON.parse(raw);
     if(!Array.isArray(data.incumbent)||data.incumbent.length!==W||!data.incumbent.every(Number.isFinite)||!Number.isFinite(data.bestScore)||!Number.isFinite(data.bestProgress)||!Number.isSafeInteger(data.attempt))return false;
-    origin=data.origin&&typeof data.origin==='object'?data.origin:{};bestLaps=data.bestLaps&&typeof data.bestLaps==='object'?data.bestLaps:lapsFrom(data.testResults,data.records,id);incumbent=data.incumbent.slice();bestScore=data.bestScore;bestProgress=Math.max(0,Math.min(tracks[id].total,data.bestProgress));attempt=data.attempt;generation=Number.isSafeInteger(data.generation)?data.generation:1;
+    origin=data.origin&&typeof data.origin==='object'?data.origin:{};bestLaps=data.bestLaps&&typeof data.bestLaps==='object'?data.bestLaps:lapsFrom(data.testResults,data.records,id,origin.date);incumbent=data.incumbent.slice();bestScore=data.bestScore;bestProgress=Math.max(0,Math.min(tracks[id].total,data.bestProgress));attempt=data.attempt;generation=Number.isSafeInteger(data.generation)?data.generation:1;
     history=Array.isArray(data.history)?data.history.filter(Number.isFinite).slice(-180):[];records=Array.isArray(data.records)?data.records.slice(-200):[];samples=Array.isArray(data.samples)?data.samples.slice(-1000):[];testResults=Array.isArray(data.testResults)?data.testResults.slice(-50):[];
     $('logCount').textContent=records.length+' gespeicherte Versuche';$('storageStatus').textContent=fromV1?'✓ Fahrer aus Racing Lab v1 übernommen.':'✓ Gespeichertes Training geladen. Der nächste Versuch baut auf dem besten Fahrer auf.';
     return true;
@@ -135,8 +136,7 @@ function endCar(c,reason){
   const improved=c.score>bestScore;c.improved=improved;
   records.push({at:nowIso(),algorithm:algoLabel(),attempt,generation,car:c.id,score:c.score,reason,improved,time:c.time,progress:c.progress,weights:c.weights.slice(),deltaFromBest:incumbent?c.weights.map((w,i)=>w-incumbent[i]):null});if(records.length>5000)records.shift();
   $('logCount').textContent=records.length+' protokollierte Versuche';
-  if(reason==='Runde geschafft!')noteLap(trackId,c.time);
-  if(improved){bestScore=c.score;incumbent=c.weights.slice();origin={date:nowIso(),algorithm:algoLabel()};bestProgress=Math.max(bestProgress,c.max);status='Verbesserung gespeichert · '+reason;}
+  if(improved){bestLaps={};if(reason==='Runde geschafft!')noteLap(trackId,c.time);bestScore=c.score;incumbent=c.weights.slice();origin={date:nowIso(),algorithm:algoLabel()};bestProgress=Math.max(bestProgress,c.max);status='Verbesserung gespeichert · '+reason;}
   attempt++;
 }
 // Neue Generation aus der alten: Bester bisher + Elite + Zuwanderer + Kinder.
@@ -246,7 +246,7 @@ $('importFile').onchange=async e=>{
     setMethod(data.population===1||/^sequential/.test(data.algorithm||'')?'single':'population');// weiter mit dem Verfahren, mit dem er trainiert wurde
     origin=data.meta&&typeof data.meta==='object'?{date:data.meta.trainedAt||null,algorithm:data.meta.algorithm||null}:{date:null,algorithm:/genetic/.test(data.algorithm||'')?'Population (genetischer Algorithmus)':'Einzelwagen (Hill Climbing)'};
     incumbent=data.bestWeights.slice();bestScore=data.bestScore;records=Array.isArray(data.records)?data.records.filter(r=>r&&Number.isSafeInteger(r.attempt)&&Number.isFinite(r.score)&&Number.isFinite(r.progress)&&Number.isFinite(r.time)).slice(-200):[];samples=Array.isArray(data.samples)?data.samples.slice(-1000):[];testResults=Array.isArray(data.testResults)?data.testResults.slice(-50):[];showTestResults();
-    bestLaps=data.bestLaps&&typeof data.bestLaps==='object'?{...data.bestLaps}:lapsFrom(data.testResults,data.records,target);
+    bestLaps=data.bestLaps&&typeof data.bestLaps==='object'?{...data.bestLaps}:lapsFrom(data.testResults,data.records,target,origin.date);
     bestProgress=Number.isFinite(data.bestProgress)?Math.max(0,Math.min(T.total,data.bestProgress)):Math.max(0,...records.filter(r=>r.improved).map(r=>Math.min(T.total,r.progress)));
     attempt=records.length?Math.max(...records.map(r=>r.attempt))+1:2;generation=Number.isSafeInteger(data.generation)?data.generation:1;collision=null;
     // Verlauf „Bester Score“ aus den mitgelieferten Versuchen nachbilden (laufendes Maximum)
