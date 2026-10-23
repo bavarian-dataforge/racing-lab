@@ -15,6 +15,16 @@ N_WEIGHTS = 122                                       # 10×(1+9) + 2×(1+10)
 G = 9.81 * 5                                          # Erdbeschleunigung in Einheiten/s² (1 m = 5 Einheiten)
 CLEAR = 2.5 * 5                                       # Abstandsregel: seitlicher Mindestabstand 2,5 m
 CLEAR_WEIGHT = 100                                    # Punktabzug je Sekunde bei voller Unterschreitung
+# Lenkruhe (v2.9): Die Fahrer schwingen um die Ideallinie – regelungstechnisch ein Regler mit zu
+# hoher Verstärkung und zu wenig Dämpfung. Da sich einem Netz keine Regel einprogrammieren lässt,
+# belohnen wir ruhiges Lenken über das Gütekriterium: Jede Lenkänderung kostet Punkte.
+# Maß ist der Lenkweg Σ|ΔLenkung| (wie weit das Lenkrad insgesamt bewegt wird). Er bildet
+# Hin-und-her-Pendeln direkt ab. Quadrierte Änderungen wurden verworfen: Sie bestrafen vor
+# allem einzelne große Einschläge (z. B. am Start) und kaum das ständige Pendeln.
+# Kalibrierung an vorhandenen Fahrern (Testkurs 01): ruhig 32–43, nervös ~60 Einheiten Lenkweg.
+# Mit 2 Punkten je Einheit trennt die Regel ruhig von nervös um rund 35 Punkte; ein paar
+# Zehntel Rundenzeit sind dagegen < 1 Punkt. Der Rundenbonus (500) bleibt dominant.
+CALM_WEIGHT = 2                                       # Punktabzug je Einheit Lenkweg
 
 
 def predict(inputs, w):
@@ -51,6 +61,8 @@ class Car:
     grip_use: float = 0.0  # genutzte Haftung: |Beschleunigung| / (µ·g)
     sliding: bool = False  # rutschte im vorigen Schritt → nur Gleitreibung verfügbar
     near: float = 0.0      # Zeit unter dem Mindestabstand, gewichtet mit der Unterschreitung (0…1)
+    steer_travel: float = 0.0  # Lenkweg Σ|ΔLenkung| über die Fahrt (Lenkruhe)
+    last_steer: float = 0.0    # Lenkung im vorigen Zeitschritt
     sensors: list = field(default_factory=list)
     last: tuple = None     # Position im vorigen Schritt
 
@@ -141,6 +153,9 @@ def advance(track, c, w, grip=0.0, slide=1.0):
     if d < CLEAR:
         c.near += (CLEAR - d) / CLEAR * DT
     steer, pedal = predict([s / 180 for s in c.sensors] + [c.v / 160, c.omega / 4], w)
+    # Lenkruhe messen (wird nur mit Lenkruhe bewertet): Lenkweg seit dem vorigen Zeitschritt
+    c.steer_travel += abs(steer - c.last_steer)
+    c.last_steer = steer
     if grip:
         physics_grip(c, steer, pedal, grip * G, slide)
     else:
@@ -178,14 +193,20 @@ def advance(track, c, w, grip=0.0, slide=1.0):
     return None
 
 
-def score(track, c, clearance=False):
+def score(track, c, clearance=False, calm=False):
     """Bewertung: Fortschritt (max. eine Runde) − 0,6 × Zeit + 500 für eine volle Runde.
-    Mit Abstandsregel zusätzlich: − 100 × (Zeit nahe der Wand, gewichtet nach Unterschreitung)."""
-    base = min(c.progress, track.total) - c.time * .6 + (500 if c.progress >= track.total else 0)
-    return base - CLEAR_WEIGHT * c.near if clearance else base
+    Mit Abstandsregel zusätzlich: − 100 × (Zeit nahe der Wand, gewichtet nach Unterschreitung).
+    Mit Lenkruhe zusätzlich:      − 2 × Lenkweg Σ|ΔLenkung|.
+    Reihenfolge der Abzüge wie in sim.js (scoreOf), damit die Punktzahlen bitgenau gleich sind."""
+    s = min(c.progress, track.total) - c.time * .6 + (500 if c.progress >= track.total else 0)
+    if clearance:
+        s -= CLEAR_WEIGHT * c.near
+    if calm:
+        s -= CALM_WEIGHT * c.steer_travel
+    return s
 
 
-def drive(track, w, grip=0.0, slide=1.0, on_step=None, clearance=False):
+def drive(track, w, grip=0.0, slide=1.0, on_step=None, clearance=False, calm=False):
     """Fährt einen kompletten Versuch und gibt (Wagen, Grund, Score) zurück."""
     c = start_car(track)
     while True:
@@ -193,4 +214,4 @@ def drive(track, w, grip=0.0, slide=1.0, on_step=None, clearance=False):
         if on_step:
             on_step(c)
         if reason:
-            return c, reason, score(track, c, clearance)
+            return c, reason, score(track, c, clearance, calm)

@@ -106,6 +106,10 @@ Mehr dazu in [`racing-lab-v2/python/README.md`](racing-lab-v2/python/README.md).
 - **Länger trainiert, schlechter auf neuen Strecken.** 81 Generationen mehr Training brachten
   0,12 Sekunden auf der Trainingsstrecke und kosteten zwei Prüfstrecken
   ([Messung](racing-lab-v2/docs/Validierung.md)).
+- **Ruhig lenken und Abstand halten: Jetzt klappt es planbar.** Mit Lenkruhe und Abstandsregel
+  in der Bewertung schafften alle drei Fahrer eines Experiments den Nürburgring, zwei sogar alle
+  Prüfstrecken. Ohne diese Regeln schaffte das keiner. Der Preis: rund 1,3 s pro Runde auf der
+  Trainingsstrecke ([Experiment](racing-lab-v2/docs/Validierung.md)).
 - **Abstand halten macht vielseitiger.** Mit einer Abstandsregel in der Bewertung (seitlich
   mindestens 2,5 m zur Wand) schafften die Fahrer im Schnitt 3,3 statt 2,0 von 5 Prüfstrecken.
   Das kostete 0,3 s pro Runde ([Experiment](racing-lab-v2/docs/Validierung.md)).
@@ -133,6 +137,7 @@ Mehr dazu in [`racing-lab-v2/python/README.md`](racing-lab-v2/python/README.md).
 | **v2.6** | Rundenzeit live und Bestzeit je Strecke in der Telemetrie |
 | **v2.7** | Bestzeit gehört zum aktuellen besten Fahrer; Skripte mit Versionskennung gegen veraltete Browser-Zwischenspeicher |
 | **v2.8** | Bewertung wählbar: Standard oder mit Abstandsregel 2,5 m (Browser und Python) |
+| **v2.9** | Lenkruhe in der Bewertung, kombinierbar mit der Abstandsregel; erstmals reproduzierbar vielseitige Fahrer |
 
 Jede Stufe hat ein Git-Tag. Die ausführliche Chronologie steht in
 [`racing-lab-v2/docs/Racing-Lab-Chronologie.md`](racing-lab-v2/docs/Racing-Lab-Chronologie.md).

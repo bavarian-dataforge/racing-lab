@@ -177,6 +177,11 @@ async function run() {
   lab.switchCourse('training'); el('toggle').onclick();
   runUntil(lab, () => lab.stats().generation > 1, 20000);
   assert(saved.has('racing-lab-v2-driver-training-abstand'));
+  // Lenkruhe und Kombination: eigene Fahrerstände
+  lab.switchScoring('abstand+ruhe'); assert.equal(lab.stats().scoring, 'abstand+ruhe');
+  el('toggle').onclick(); const g0 = lab.stats().generation;
+  runUntil(lab, () => lab.stats().generation > g0, 20000);
+  assert(saved.has('racing-lab-v2-driver-training-abstand+ruhe'));
   lab.switchScoring('standard');
 
   // 7) Neustart lädt Zustand; "Neu beginnen" löscht nur den aktiven Fahrer.
@@ -193,7 +198,7 @@ async function run() {
     const ref = (data.testResults || []).at(-1);
     if (!ref) continue;
     await load(reloaded.el, data);
-    assert.equal(reloaded.lab.stats().scoring, data.scoring?.model === 'abstand' ? 'abstand' : 'standard', f);
+    assert.equal(reloaded.lab.stats().scoring, data.scoring?.model ?? 'standard', f);
     const want = data.physics?.model !== 'kamm' ? 'v1' : (data.physics.slide ?? 1) === 1 ? 'grip' : 'slide';
     assert.equal(reloaded.lab.stats().physics, want, f);
     assert.equal(reloaded.lab.stats().method, data.population === 1 ? 'single' : 'population', f);

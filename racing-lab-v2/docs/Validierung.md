@@ -222,3 +222,54 @@ Richtung ist eindeutig, die genauen Zahlen sind es nicht.
 
 Python und Browser rechnen mit Abstandsregel identisch, Rundenzeit und Punktzahl
 (`tests/regression.cjs`, Fahrer `fahrer-training-v1physik-abstand-seed1.json`).
+
+## v2.9 · Lenkruhe im Gütekriterium
+
+**Beobachtung (Flo):** Auch der Fahrer mit Abstandsregel scheitert am Nürburgring beim
+Herausfahren aus der Haarnadel. Er pendelt mit Lenkausschlägen von ±0,5–0,8 und schlägt beim
+Gegenlenken an. Regelungstechnisch: zu hohe Verstärkung, zu wenig Dämpfung. In unserer Physik
+wächst die wirksame Verstärkung zudem mit dem Tempo (Drehrate ≈ Tempo × Lenkwinkel).
+
+**Abwägung:** Zwei Wege wurden diskutiert.
+- A) Lenkwinkel abhängig vom Tempo begrenzen (Gain Scheduling, Änderung der Physik).
+- B) Ruhiges Lenken belohnen (Änderung des Gütekriteriums).
+
+Gewählt wurde B, weil die Physik unverändert und alles mit den bisherigen Experimenten
+vergleichbar bleibt. A bleibt als realistischere Ergänzung für später.
+
+**Kennzahl:** Lenkweg Σ|ΔLenkung| über die Fahrt, also wie weit das Lenkrad insgesamt bewegt
+wird. Quadrierte Änderungen wurden verworfen: Sie hätten Flos ruhigen v1-Fahrer wegen eines
+einzigen großen Einschlags am Start stärker bestraft als pendelnde Fahrer.
+
+**Kalibrierung** (Testkurs 01, Physik v1): Lenkweg ruhiger Fahrer 32–43, nervöser ~60. Gewicht
+2 Punkte je Einheit, also rund 35 Punkte Unterschied zwischen ruhig und nervös. Ein paar
+Zehntel Rundenzeit machen weniger als 1 Punkt aus, der Rundenbonus (500) bleibt dominant.
+
+**Experiment** (Python, Physik v1, 40 Wagen, 60 Generationen, Seeds 1–3; dieselben
+Einstellungen wie beim Abstandsregel-Experiment; Dateien in `fahrer/experiment-lenkruhe/`):
+
+| Bewertung | Seed | 1. Runde | Runde Kurs 01 | Lenkweg | Lenkwechsel/s | 02 03 04 05 Ring |
+| --- | --- | --- | --- | --- | --- | --- |
+| Lenkruhe | 1 | Gen 10 | 17,30 s | 7,0 | 0,23 | ✓ ✓ ✓ · · (3/5), Ring 87 % |
+| Lenkruhe | 2 | Gen 7 | 17,72 s | 6,6 | 0,23 | · ✓ ✓ · ✓ (3/5), Ring 153,3 s |
+| Lenkruhe | 3 | Gen 6 | 17,33 s | 7,6 | 0,23 | · ✓ ✓ ✓ ✓ (4/5), Ring 153,0 s |
+| Abstand + Lenkruhe | 1 | Gen 6 | 18,07 s | 7,5 | 0,22 | ✓ · ✓ · ✓ (3/5), Ring 157,5 s |
+| **Abstand + Lenkruhe** | **2** | Gen 7 | 16,72 s | 8,9 | 0,24 | **✓ ✓ ✓ ✓ ✓ (5/5), Ring 152,1 s** |
+| **Abstand + Lenkruhe** | **3** | Gen 5 | 17,03 s | 8,6 | 0,23 | **✓ ✓ ✓ ✓ ✓ (5/5), Ring 152,7 s** |
+
+| Mittelwert (je 3 Seeds) | Prüfstrecken | Nürburgring geschafft | Lenkweg | Lenkwechsel/s | Runde Kurs 01 |
+| --- | --- | --- | --- | --- | --- |
+| Standard | 2,0 / 5 | 0 / 3 | 52,7 | 1,63 | 15,92 s |
+| Abstandsregel | 3,3 / 5 | 0 / 3 | 50,2 | 1,80 | 16,26 s |
+| Lenkruhe | 3,3 / 5 | 2 / 3 | 7,0 | 0,23 | 17,45 s |
+| **Abstand + Lenkruhe** | **4,3 / 5** | **3 / 3** | 8,4 | 0,23 | 17,27 s |
+
+**Ergebnis:** Lenkruhe senkt den Lenkweg auf etwa ein Siebtel und macht die Fahrer dadurch
+deutlich vielseitiger. Kombiniert mit der Abstandsregel schaffen alle drei den Nürburgring und
+zwei alle Prüfstrecken. Erstmals ist die Vielseitigkeit von Flos erstem Fahrer reproduzierbar
+statt Zufall. Der Preis sind rund 1,3 s pro Runde auf der Trainingsstrecke: Ruhe und Abstand
+kosten Tempo, verallgemeinern aber besser. Drei Seeds je Variante sind eine kleine Stichprobe,
+der Unterschied ist aber sehr deutlich.
+
+Browser und Python rechnen identisch, Rundenzeit und Punktzahl
+(`fahrer/fahrer-training-v1physik-abstand+ruhe-seed2.json`).

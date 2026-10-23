@@ -56,6 +56,13 @@ Mit Abstandsregel in der Bewertung (seitlich unter 2,5 m zur Wand kostet Punkte)
 python3 train.py --grip 0 --clearance
 ```
 
+Mit Lenkruhe (jede Lenkänderung kostet Punkte), auch kombiniert mit der Abstandsregel:
+
+```bash
+python3 train.py --grip 0 --calm
+python3 train.py --grip 0 --clearance --calm
+```
+
 Mit Vorwissen starten, also vom Fahrer aus Testkurs 01 aus weitertrainieren:
 
 ```bash

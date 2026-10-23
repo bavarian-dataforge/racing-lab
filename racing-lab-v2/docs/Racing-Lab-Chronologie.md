@@ -285,6 +285,23 @@ Das Paket enthält die ausführbare Oberfläche, den Simulationscode, Startanlei
   wäre ein eigenes Ziel. Dem Netz fehlt außerdem ein „I-Anteil“: Es hat kein Gedächtnis und sieht
   nur den aktuellen Moment.
 
+## 21. v2.9: Lenkruhe – Dämpfung über das Gütekriterium
+
+- **Beobachtung (Flo):** Der Fahrer mit Abstandsregel kratzt an der Kante, bleibt aber stabil.
+  Am Nürburgring pendelt er beim Herausfahren aus der Haarnadel und schlägt beim Gegenlenken an.
+  Flos Vorschlag: die Lenkung in Kurven begrenzen, damit er weniger heftig reagiert.
+- **Einordnung (Regelungstechnik):** zu hohe Verstärkung, zu wenig Dämpfung. In der Physik wächst
+  die wirksame Verstärkung mit dem Tempo. Abhilfe: Verstärkung senken (Gain Scheduling) oder
+  Schwingen bestrafen. Präzisierung: Den D-Anteil macht man dafür eher größer, er dämpft.
+- **Entscheidung:** Ruhiges Lenken über das Gütekriterium belohnen (Weg B), die Physik bleibt
+  unverändert. Kennzahl Lenkweg Σ|ΔLenkung|, 2 Punkte je Einheit, kalibriert an vorhandenen
+  Fahrern. Begründung und Messwerte im Code (`reference.py`) und in `Validierung.md`.
+- **Ergebnis:** Abstandsregel + Lenkruhe: alle drei Fahrer schaffen den Nürburgring, zwei alle
+  fünf Prüfstrecken. Lenkweg 53 → 8. Kosten: rund 1,3 s pro Runde auf Testkurs 01.
+- **Erkenntnis:** Was dem Netz fehlte, war kein besseres Verfahren und kein längeres Training,
+  sondern das richtige Gütekriterium. Abstand halten und ruhig lenken sind genau die
+  Eigenschaften, die Flos erster Fahrer zufällig hatte.
+
 ## Technische Vereinfachungen
 
 Das Fahrzeug verwendet ein vereinfachtes kinematisches Modell mit Lenkung, Beschleunigen, Bremsen und geschwindigkeitsabhängigem Widerstand. Es werden keine Federung, Dämpfung, Reifenschlupf, Motorkennfelder oder Drehzahl simuliert.
