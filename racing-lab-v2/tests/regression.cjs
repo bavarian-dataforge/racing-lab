@@ -24,7 +24,7 @@ function boot() {
     }),
     set: (obj, field, value) => (obj[field] = value, true),
   });
-  const defaults = {rate: '1', popSize: '40', method: 'population', driver: 'training', physics: 'slide'};
+  const defaults = {rate: '1', popSize: '40', method: 'population', driver: 'training', physics: 'slide', scoring: 'standard'};
   const el = id => elements[id] ??= {
     getContext: () => context, checked: true, style: {}, options: [],
     value: defaults[id] ?? 'training', textContent: '', attributes: {},
@@ -171,6 +171,14 @@ async function run() {
   lab.switchPhysics('v1');
   assert.equal(lab.stats().bestScore >= baseline.bestScore, true);
 
+  // 6b) Abstandsregel: eigener Fahrerstand, Training läuft
+  lab.switchScoring('abstand');
+  assert.equal(lab.stats().scoring, 'abstand');
+  lab.switchCourse('training'); el('toggle').onclick();
+  runUntil(lab, () => lab.stats().generation > 1, 20000);
+  assert(saved.has('racing-lab-v2-driver-training-abstand'));
+  lab.switchScoring('standard');
+
   // 7) Neustart lädt Zustand; "Neu beginnen" löscht nur den aktiven Fahrer.
   const reloaded = boot();
   assert.equal(reloaded.lab.stats().driverId, 'training');
@@ -185,6 +193,7 @@ async function run() {
     const ref = (data.testResults || []).at(-1);
     if (!ref) continue;
     await load(reloaded.el, data);
+    assert.equal(reloaded.lab.stats().scoring, data.scoring?.model === 'abstand' ? 'abstand' : 'standard', f);
     const want = data.physics?.model !== 'kamm' ? 'v1' : (data.physics.slide ?? 1) === 1 ? 'grip' : 'slide';
     assert.equal(reloaded.lab.stats().physics, want, f);
     assert.equal(reloaded.lab.stats().method, data.population === 1 ? 'single' : 'population', f);
@@ -193,6 +202,11 @@ async function run() {
     const got = reloaded.lab.stats().testResults.at(-1);
     assert.equal(got.reason, ref.reason, f);
     assert(Math.abs(got.time - ref.time) < 1e-9, `${f}: ${got.time} vs Python ${ref.time}`);
+    // Mit Bewertungsmodell im Datensatz (Python ab v2.8): auch die Punktzahl muss exakt stimmen
+    if (data.scoring && ref.trackId === data.trainingTrackId) {
+      const sc = reloaded.lab.stats().car.score;
+      assert(Math.abs(sc - data.bestScore) < 1e-6, `${f}: Score ${sc} vs Python ${data.bestScore}`);
+    }
     console.log(`  Parität Python → Browser ${f.padEnd(36)} ${got.time.toFixed(4)} s ✓`);
   }
   console.log('PASS: v1-Parität, 6 Strecken, eingefrorene Testgewichte, Population (Generation 1→2),');

@@ -271,6 +271,20 @@ Das Paket enthält die ausführbare Oberfläche, den Simulationscode, Startanlei
   Browser-Exporte dieses Laufs stammen aus einer Fassung vor v2.6, vermutlich aus dem
   ZIP-Download in `racing-lab-main`.
 
+## 20. v2.8: Abstandsregel – das Gütekriterium ändern
+
+- **Ausgangsfrage (Flo):** Kann man dem Netz mitgeben, dass die Strahlen eine Grenze nie
+  unterschreiten? Im Vergleich mit der Regelungstechnik: Das Netz ist der Regler, die
+  Bewertung das Gütekriterium. Eine Regel lässt sich einem Netz nicht hineinschreiben, aber
+  man kann sie belohnen (Weg 1) oder außerhalb des Netzes erzwingen (Weg 2, Sicherheitsschicht).
+- **Umsetzung (Weg 1):** Schalter „Bewertung: Standard / mit Abstandsregel 2,5 m“ im Browser,
+  `--clearance` in Python, eigene Fahrerstände je Bewertung, Telemetrie zeigt den Seitenabstand.
+- **Ergebnis:** 3 Seeds je Variante: Prüfstrecken Ø 2,0 → 3,3 von 5. Zwei Fahrer schaffen erstmals
+  wieder die Gegenrichtung. Nahe der Wand: 7,2 s → 0 s. Kosten: 0,3 s pro Runde. Das Wackeln bleibt.
+- **Erkenntnis:** Was man belohnt, bekommt man. Abstand halten macht vielseitiger, ruhig lenken
+  wäre ein eigenes Ziel. Dem Netz fehlt außerdem ein „I-Anteil“: Es hat kein Gedächtnis und sieht
+  nur den aktuellen Moment.
+
 ## Technische Vereinfachungen
 
 Das Fahrzeug verwendet ein vereinfachtes kinematisches Modell mit Lenkung, Beschleunigen, Bremsen und geschwindigkeitsabhängigem Widerstand. Es werden keine Federung, Dämpfung, Reifenschlupf, Motorkennfelder oder Drehzahl simuliert.

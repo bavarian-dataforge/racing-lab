@@ -177,3 +177,48 @@ und nach Generation 125 exportiert. Beide Fahrer liegen in `fahrer/`
 letzte Verbesserung in Generation 124) und kosteten zwei Prüfstrecken. Die Gewichte
 verschoben sich im Mittel um 0,14. Generation 44 ist der bessere Fahrer, Generation 125 der
 schnellere auf seiner Strecke. Beide Ergebnisse reproduziert `replay.py` exakt.
+
+## v2.8 · Abstandsregel im Gütekriterium
+
+Idee (Flo): Die Strahlen sollen eine Grenze nicht unterschreiten. Umgesetzt als Teil der
+Bewertung („Weg 1“, Reward Shaping). Jede Zeit, in der der seitliche Abstand (Strahl links
+oder rechts) unter 2,5 m liegt, kostet 100 Punkte je Sekunde bei voller Unterschreitung,
+anteilig weniger bei geringer. Die Physik bleibt unverändert.
+
+**Vorab-Messung an vorhandenen Fahrern** (Testkurs 01, Physik v1): Die Zeit nahe der Wand
+hängt mit der Vielseitigkeit zusammen.
+
+| Fahrer | Zeit unter 2,5 m | Prüfstrecken |
+| --- | --- | --- |
+| Flos v1-Fahrer | 0,4 s | 5 von 5 |
+| 80 Wagen, Gen. 44 | 7,7 s | 3 von 5 |
+| 80 Wagen, Gen. 125 | 10,4 s | 1 von 5 |
+
+**Experiment** (Python, Physik v1, 40 Wagen, 60 Generationen, Seeds 1–3, sonst identisch;
+Dateien in `fahrer/experiment-abstandsregel/`):
+
+| Lauf | 1. Runde | Runde Kurs 01 | unter 2,5 m | Lenkwechsel/s | 02 03 04 05 Ring |
+| --- | --- | --- | --- | --- | --- |
+| ohne, Seed 1 | Gen 6 | 15,95 s | 4,0 s | 1,13 | ✓ ✓ ✓ · · (3/5) |
+| ohne, Seed 2 | Gen 10 | 15,95 s | 8,1 s | 2,01 | · · ✓ · · (1/5) |
+| ohne, Seed 3 | Gen 9 | 15,85 s | 9,5 s | 1,77 | ✓ ✓ · · · (2/5) |
+| **mit, Seed 1** | Gen 5 | 16,30 s | 0,0 s | 2,94 | ✓ ✓ ✓ ✓ · (4/5) |
+| **mit, Seed 2** | Gen 13 | 16,27 s | 0,0 s | 1,84 | ✓ ✓ ✓ ✓ · (4/5) |
+| **mit, Seed 3** | Gen 6 | 16,20 s | 0,0 s | 0,62 | ✓ ✓ · · · (2/5) |
+
+| Mittelwert | ohne | mit Abstandsregel |
+| --- | --- | --- |
+| Prüfstrecken | 2,0 von 5 | **3,3 von 5** |
+| Zeit nahe der Wand | 7,2 s | 0,0 s |
+| Rundenzeit Testkurs 01 | 15,92 s | 16,26 s |
+| Lenkwechsel/s | 1,63 | 1,80 |
+
+**Ergebnis:** Mit Abstandsregel verallgemeinern die Fahrer deutlich besser. Zwei von drei
+schaffen auch die Gegenrichtung, was bisher nur Flos erster Fahrer konnte. Der Preis sind
+rund 0,3 s auf der Trainingsstrecke. Das Wackeln verschwindet dadurch nicht: Abstand halten
+und ruhig lenken sind zwei verschiedene Ziele. Den Nürburgring schafft keiner, der beste
+(Seed 1) kommt aber 45 % weit statt 23 %. Drei Seeds sind eine kleine Stichprobe. Die
+Richtung ist eindeutig, die genauen Zahlen sind es nicht.
+
+Python und Browser rechnen mit Abstandsregel identisch, Rundenzeit und Punktzahl
+(`tests/regression.cjs`, Fahrer `fahrer-training-v1physik-abstand-seed1.json`).

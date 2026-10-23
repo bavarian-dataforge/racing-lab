@@ -13,6 +13,8 @@ ANGLES = [-1.55, -1.05, -.5, 0, .5, 1.05, 1.55]       # Sensorrichtungen relativ
 SENSOR_RANGE = 180                                    # 36 m
 N_WEIGHTS = 122                                       # 10×(1+9) + 2×(1+10)
 G = 9.81 * 5                                          # Erdbeschleunigung in Einheiten/s² (1 m = 5 Einheiten)
+CLEAR = 2.5 * 5                                       # Abstandsregel: seitlicher Mindestabstand 2,5 m
+CLEAR_WEIGHT = 100                                    # Punktabzug je Sekunde bei voller Unterschreitung
 
 
 def predict(inputs, w):
@@ -48,6 +50,7 @@ class Car:
     slip: float = 0.0      # 0 = haftet, >0 = rutscht (Anteil der nicht umsetzbaren Drehrate)
     grip_use: float = 0.0  # genutzte Haftung: |Beschleunigung| / (µ·g)
     sliding: bool = False  # rutschte im vorigen Schritt → nur Gleitreibung verfügbar
+    near: float = 0.0      # Zeit unter dem Mindestabstand, gewichtet mit der Unterschreitung (0…1)
     sensors: list = field(default_factory=list)
     last: tuple = None     # Position im vorigen Schritt
 
@@ -133,6 +136,10 @@ def advance(track, c, w, grip=0.0, slide=1.0):
     slide < 1: Gleitreibung als Anteil von µ (Kontrollverlust beim Rutschen).
     """
     c.sensors = sense(track, c)
+    # Abstandsregel messen: seitliche Strahlen (links, rechts) gegen den Mindestabstand
+    d = min(c.sensors[0], c.sensors[6])
+    if d < CLEAR:
+        c.near += (CLEAR - d) / CLEAR * DT
     steer, pedal = predict([s / 180 for s in c.sensors] + [c.v / 160, c.omega / 4], w)
     if grip:
         physics_grip(c, steer, pedal, grip * G, slide)
@@ -171,12 +178,14 @@ def advance(track, c, w, grip=0.0, slide=1.0):
     return None
 
 
-def score(track, c):
-    """Bewertung: Fortschritt (max. eine Runde) − 0,6 × Zeit + 500 für eine volle Runde."""
-    return min(c.progress, track.total) - c.time * .6 + (500 if c.progress >= track.total else 0)
+def score(track, c, clearance=False):
+    """Bewertung: Fortschritt (max. eine Runde) − 0,6 × Zeit + 500 für eine volle Runde.
+    Mit Abstandsregel zusätzlich: − 100 × (Zeit nahe der Wand, gewichtet nach Unterschreitung)."""
+    base = min(c.progress, track.total) - c.time * .6 + (500 if c.progress >= track.total else 0)
+    return base - CLEAR_WEIGHT * c.near if clearance else base
 
 
-def drive(track, w, grip=0.0, slide=1.0, on_step=None):
+def drive(track, w, grip=0.0, slide=1.0, on_step=None, clearance=False):
     """Fährt einen kompletten Versuch und gibt (Wagen, Grund, Score) zurück."""
     c = start_car(track)
     while True:
@@ -184,4 +193,4 @@ def drive(track, w, grip=0.0, slide=1.0, on_step=None):
         if on_step:
             on_step(c)
         if reason:
-            return c, reason, score(track, c)
+            return c, reason, score(track, c, clearance)

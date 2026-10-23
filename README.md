@@ -106,6 +106,9 @@ Mehr dazu in [`racing-lab-v2/python/README.md`](racing-lab-v2/python/README.md).
 - **Länger trainiert, schlechter auf neuen Strecken.** 81 Generationen mehr Training brachten
   0,12 Sekunden auf der Trainingsstrecke und kosteten zwei Prüfstrecken
   ([Messung](racing-lab-v2/docs/Validierung.md)).
+- **Abstand halten macht vielseitiger.** Mit einer Abstandsregel in der Bewertung (seitlich
+  mindestens 2,5 m zur Wand) schafften die Fahrer im Schnitt 3,3 statt 2,0 von 5 Prüfstrecken.
+  Das kostete 0,3 s pro Runde ([Experiment](racing-lab-v2/docs/Validierung.md)).
 - **Der erste Fahrer war ein Glückstreffer.** Von 19 Fahrern, alle nur auf Testkurs 01
   trainiert, schaffte allein der allererste alle fünf Prüfstrecken. Die übrigen 18 schafften
   eine bis drei.
@@ -129,6 +132,7 @@ Mehr dazu in [`racing-lab-v2/python/README.md`](racing-lab-v2/python/README.md).
 | **v2.5** | README mit Bildern; Aufnahmeskript `racing-lab-v2/tools/screenshots.mjs` |
 | **v2.6** | Rundenzeit live und Bestzeit je Strecke in der Telemetrie |
 | **v2.7** | Bestzeit gehört zum aktuellen besten Fahrer; Skripte mit Versionskennung gegen veraltete Browser-Zwischenspeicher |
+| **v2.8** | Bewertung wählbar: Standard oder mit Abstandsregel 2,5 m (Browser und Python) |
 
 Jede Stufe hat ein Git-Tag. Die ausführliche Chronologie steht in
 [`racing-lab-v2/docs/Racing-Lab-Chronologie.md`](racing-lab-v2/docs/Racing-Lab-Chronologie.md).

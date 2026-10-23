@@ -50,6 +50,12 @@ python3 train.py --method single --attempts 300 --grip 0
 Jede Fahrer-Datei hält im Kopf `meta` fest, wann, auf welcher Strecke, mit welcher Physik
 und mit welchem Verfahren trainiert wurde. Der Browser zeigt diese Angaben im Prüfprotokoll.
 
+Mit Abstandsregel in der Bewertung (seitlich unter 2,5 m zur Wand kostet Punkte):
+
+```bash
+python3 train.py --grip 0 --clearance
+```
+
 Mit Vorwissen starten, also vom Fahrer aus Testkurs 01 aus weitertrainieren:
 
 ```bash
