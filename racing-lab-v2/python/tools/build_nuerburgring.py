@@ -62,6 +62,8 @@ track = {
     "name": "Nürburgring · GP-Strecke",
     "lengthMeters": round(length_m, 1),
     "source": "TUMFTM racetrack-database, tracks/Nuerburgring.csv, LGPL-3.0",
+    "license": "LGPL-3.0 (bearbeitete Daten; siehe NOTICE.md und LICENSES/)",
+    "attribution": "TUMFTM racetrack-database (TU München); Kartengrundlage © OpenStreetMap-Mitwirkende",
     "rotationDegrees": round(math.degrees(best_angle)),
     "unitsPerMeter": UNITS_PER_METER,
     "timeLimit": 600,
@@ -74,6 +76,8 @@ track = {
 (root / "tracks" / "nuerburgring.json").write_text(json.dumps(track))
 (root / "tracks" / "nuerburgring.js").write_text(
     "// Erzeugt von python/tools/build_nuerburgring.py – nicht von Hand ändern.\n"
+    "// Streckendaten: TUMFTM racetrack-database (TU München), LGPL-3.0, bearbeitet\n"
+    "// (gedreht, skaliert). Kartengrundlage © OpenStreetMap-Mitwirkende. Siehe NOTICE.md.\n"
     "window.RACING_TRACKS=window.RACING_TRACKS||{};\n"
     f"window.RACING_TRACKS.nuerburgring={json.dumps(track)};\n"
 )

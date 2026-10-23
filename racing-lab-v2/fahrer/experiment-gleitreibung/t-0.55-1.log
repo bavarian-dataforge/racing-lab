@@ -62,4 +62,4 @@ Testkurs 01 · Trainingsstrecke · 540 m · 40 Wagen · Seed 1 · Haftung 1.5 g,
   59        3179.3   100.0%   31.87s   23/40        1.3s
   60        3179.6   100.0%   31.37s   21/40        1.2s
 
-Gespeichert: /private/tmp/claude-501/-Users-florianenglmeier-nextcloud-Documents-Programming-GitHub-HomePage-FlorianEnglmeier/3ea12129-7cb1-4040-a297-ba6142bb1ec2/scratchpad/slide/t-0.55-1.json  →  im Browser „JSON-Stand laden“ oder: python3 replay.py /private/tmp/claude-501/-Users-florianenglmeier-nextcloud-Documents-Programming-GitHub-HomePage-FlorianEnglmeier/3ea12129-7cb1-4040-a297-ba6142bb1ec2/scratchpad/slide/t-0.55-1.json
+Gespeichert: fahrer/experiment-gleitreibung/t-0.55-1.json  →  im Browser „JSON-Stand laden“ oder: python3 replay.py fahrer/experiment-gleitreibung/t-0.55-1.json

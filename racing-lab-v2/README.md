@@ -58,10 +58,11 @@ racing-lab-v2/
   docs/                         Technik, Validierung, Chronologie
 ```
 
-## Quelle der Streckendaten
+## Lizenz und Quelle der Streckendaten
 
-Nürburgring: TUMFTM racetrack-database, `tracks/Nuerburgring.csv`,
-<https://github.com/TUMFTM/racetrack-database>, Lizenz LGPL-3.0. Die Daten wurden
-gedreht (84°), in 0,2-m-Einheiten umgerechnet und sonst nicht verändert
-(`python/tools/build_nuerburgring.py`). Vor einer Veröffentlichung die
-Lizenzbedingungen prüfen.
+Code: MIT (siehe `../LICENSE`). Nürburgring-Daten: TUMFTM racetrack-database,
+`tracks/Nuerburgring.csv`, <https://github.com/TUMFTM/racetrack-database>, Lizenz LGPL-3.0.
+Kartengrundlage © OpenStreetMap-Mitwirkende. Die Daten wurden gedreht (84°), in
+0,2-m-Einheiten umgerechnet und sonst nicht verändert
+(`python/tools/build_nuerburgring.py`). Die bearbeiteten Dateien in `tracks/` stehen
+ebenfalls unter LGPL-3.0. Details: `../NOTICE.md`.

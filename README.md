@@ -34,5 +34,9 @@ Danach <http://127.0.0.1:8000> öffnen. Training in Python: siehe `racing-lab-v2
 
 ## Lizenz
 
-Noch nicht festgelegt. Die Nürburgring-Daten stammen aus der
-[TUMFTM racetrack-database](https://github.com/TUMFTM/racetrack-database) (LGPL-3.0).
+- **Code, Doku, Testkurse und trainierte Fahrer:** MIT (`LICENSE`), © 2026 Florian Englmeier.
+- **Streckendaten Nürburgring:** LGPL-3.0, aus der
+  [TUMFTM racetrack-database](https://github.com/TUMFTM/racetrack-database) (TU München),
+  Kartengrundlage © OpenStreetMap-Mitwirkende. Details: `NOTICE.md`.
+- „Nürburgring“ wird nur beschreibend verwendet. Das Projekt ist ein privates Lernprojekt
+  ohne Verbindung zur Nürburgring GmbH.

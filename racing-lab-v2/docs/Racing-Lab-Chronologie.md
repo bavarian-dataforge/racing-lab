@@ -226,6 +226,15 @@ Das Paket enthält die ausführbare Oberfläche, den Simulationscode, Startanlei
 - **Änderung:** `train.py --method single --attempts N` (Hill Climbing wie v1: 65 % der Gewichte mutieren, 5 % Neustarts). Kopf `meta` und Prüfprotokoll nennen „Einzelwagen (Hill Climbing) · Python, Seed …“. Der Browser übernimmt beim Import das passende Lernverfahren.
 - **Beobachtung:** Seed 1: erste Runde nach 54 Versuchen, 16,05 s nach 300 Versuchen. Schafft 3 von 6 Strecken; Flos v1-Fahrer alle 6.
 
+## 16. v2.4: Lizenz und Veröffentlichung
+
+- **Entscheidung (Flo):** Repository öffentlich, eigener Code unter MIT.
+- **Umsetzung:** `LICENSE` (MIT), `NOTICE.md`, `LICENSES/` (LGPL-3.0, GPL-3.0). Die
+  Nürburgring-Daten bleiben LGPL-3.0 und sind in Dateien, README und Fußzeile gekennzeichnet.
+  OpenStreetMap ist als Kartengrundlage genannt, dazu ein Markenhinweis zu „Nürburgring“.
+- **Erkenntnis:** Eine leicht veränderte Strecke wäre weiterhin eine Bearbeitung der Daten.
+  Saubere Quellenangabe ist einfacher und seriöser als Umbenennen.
+
 ## Technische Vereinfachungen
 
 Das Fahrzeug verwendet ein vereinfachtes kinematisches Modell mit Lenkung, Beschleunigen, Bremsen und geschwindigkeitsabhängigem Widerstand. Es werden keine Federung, Dämpfung, Reifenschlupf, Motorkennfelder oder Drehzahl simuliert.
