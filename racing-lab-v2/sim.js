@@ -210,7 +210,7 @@ function draw(){
   const fs=1.6;drawScene(fx,fs,160-lead.x*fs,80-lead.y*fs,320,160);
   const [steer,pedal]=lead.act.output,alive=cars.filter(c=>c.alive).length;
   $('gripUse').textContent=lead.gripUse.toFixed(2)+(lead.slip>0?' · rutscht!':physics==='v1'&&lead.gripUse>1?' · (ohne Grenze)':'');$('gripbar').style.width=Math.min(100,lead.gripUse*100)+'%';$('gripbar').style.background=lead.slip>0||lead.gripUse>1?'#c4302b':'#f47342';
-  $('attempt').textContent=method==='single'||testMode?attempt:generation;$('speed').textContent=Math.round(lead.v*.2*3.6)+' km/h';$('progress').textContent=Math.max(0,Math.min(100,lead.progress/T.total*100)).toFixed(1)+' %';$('best').textContent=(bestProgress/tracks[driverId].total*100).toFixed(1)+' %';
+  $('attempt').textContent=method==='single'?attempt:generation;$('speed').textContent=Math.round(lead.v*.2*3.6)+' km/h';$('progress').textContent=Math.max(0,Math.min(100,lead.progress/T.total*100)).toFixed(1)+' %';$('best').textContent=(bestProgress/tracks[driverId].total*100).toFixed(1)+' %';
   $('steer').textContent=steer.toFixed(2);$('pedal').textContent=pedal.toFixed(2);$('steerbar').style.width=(steer+1)*50+'%';$('pedalbar').style.width=(pedal+1)*50+'%';
   $('popInfo').textContent=testMode?'Testfahrt · ein Wagen mit eingefrorenen Gewichten':method==='single'?'Einzelwagen · Hill Climbing wie v1':alive+' von '+cars.length+' Wagen unterwegs · Generation '+generation+' · '+attempt+' Fahrten gesamt';
   $('badge').textContent=running?(testMode?'● TESTFAHRT':'● TRAINING LÄUFT'):'● PAUSIERT';$('toggle').textContent=running&&!testMode?'Pause ❚❚':'Training starten ↗';
@@ -242,7 +242,9 @@ $('importFile').onchange=async e=>{
     origin=data.meta&&typeof data.meta==='object'?{date:data.meta.trainedAt||null,algorithm:data.meta.algorithm||null}:{date:null,algorithm:/genetic/.test(data.algorithm||'')?'Population (genetischer Algorithmus)':'Einzelwagen (Hill Climbing)'};
     incumbent=data.bestWeights.slice();bestScore=data.bestScore;records=Array.isArray(data.records)?data.records.filter(r=>r&&Number.isSafeInteger(r.attempt)&&Number.isFinite(r.score)&&Number.isFinite(r.progress)&&Number.isFinite(r.time)).slice(-200):[];samples=Array.isArray(data.samples)?data.samples.slice(-1000):[];testResults=Array.isArray(data.testResults)?data.testResults.slice(-50):[];showTestResults();
     bestProgress=Number.isFinite(data.bestProgress)?Math.max(0,Math.min(T.total,data.bestProgress)):Math.max(0,...records.filter(r=>r.improved).map(r=>Math.min(T.total,r.progress)));
-    attempt=records.length?Math.max(...records.map(r=>r.attempt))+1:2;generation=Number.isSafeInteger(data.generation)?data.generation:1;history=[];collision=null;idleCars();saveCheckpoint();
+    attempt=records.length?Math.max(...records.map(r=>r.attempt))+1:2;generation=Number.isSafeInteger(data.generation)?data.generation:1;collision=null;
+    // Verlauf „Bester Score“ aus den mitgelieferten Versuchen nachbilden (laufendes Maximum)
+    history=[];let run=-Infinity;for(const r of records){run=Math.max(run,r.score);history.push(run);}history=history.slice(-180);idleCars();saveCheckpoint();
     $('logCount').textContent=records.length+' importierte Versuche';$('status').textContent='Fahrer „'+label(target)+'“ aus JSON geladen · Training fortsetzen oder testen.';
   }catch(err){$('status').textContent='Import fehlgeschlagen: '+err.message;}
   e.target.value='';

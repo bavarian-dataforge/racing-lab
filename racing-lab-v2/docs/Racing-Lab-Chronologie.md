@@ -235,6 +235,18 @@ Das Paket enthält die ausführbare Oberfläche, den Simulationscode, Startanlei
 - **Erkenntnis:** Eine leicht veränderte Strecke wäre weiterhin eine Bearbeitung der Daten.
   Saubere Quellenangabe ist einfacher und seriöser als Umbenennen.
 
+## 17. v2.5: README mit Bildern
+
+- **Ziel (Flo):** Wer auf GitHub landet, soll sofort sehen, worum es geht.
+- **Umsetzung:** Vier Bilder in `docs/bilder/`: Population beim Lernen, Nürburgring mit
+  Telemetrie, Netz live, Prüfprotokoll. Sie werden reproduzierbar mit
+  `node tools/screenshots.mjs` erzeugt (Chrome headless, keine Pakete). Die Start-README
+  ist neu aufgebaut: Bild, Erklärung in drei Sätzen, Ablaufdiagramm, Verfahrensvergleich,
+  Ergebnisse.
+- **Nebenbei behoben:** Bei Testfahrten zeigte die Anzeige „GENERATION“ die Zahl der Fahrten.
+  Nach dem Laden eines Fahrers blieb die Kurve „Bester Score“ leer. Sie wird jetzt aus den
+  mitgelieferten Versuchen nachgebildet.
+
 ## Technische Vereinfachungen
 
 Das Fahrzeug verwendet ein vereinfachtes kinematisches Modell mit Lenkung, Beschleunigen, Bremsen und geschwindigkeitsabhängigem Widerstand. Es werden keine Federung, Dämpfung, Reifenschlupf, Motorkennfelder oder Drehzahl simuliert.

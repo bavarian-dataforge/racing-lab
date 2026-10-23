@@ -55,6 +55,7 @@ racing-lab-v2/
   python/                       Python-Simulation, Training, Testfahrten
   fahrer/                       in Python trainierte Fahrer + Trainingsprotokolle
   tests/regression.cjs          Prüfungen ohne Browser (node tests/regression.cjs)
+  tools/screenshots.mjs         erzeugt die README-Bilder (Chrome headless, node tools/screenshots.mjs)
   docs/                         Technik, Validierung, Chronologie
 ```
 

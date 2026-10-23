@@ -24,6 +24,8 @@ Dokumentation, die Testkurse 01–05 und die trainierten Fahrer (`*.json` mit Ne
   Streckenbreiten aus Satellitenbildern. Kartendaten © OpenStreetMap-Mitwirkende
   (<https://www.openstreetmap.org/copyright>).
 
+Das Bild `docs/bilder/02-nuerburgring.png` zeigt eine Darstellung dieser Daten. Die Quellenangabe oben gilt auch dafür.
+
 Die Simulation liest diese Daten nur ein. Der MIT-lizenzierte Code wird dadurch nicht
 zu LGPL-Code.
 
