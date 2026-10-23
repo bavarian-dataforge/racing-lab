@@ -56,11 +56,19 @@ function mutateGA(base){let scale=Math.random()<.1?.7:.12+Math.random()*.2;retur
 function tournament(ranked){let best=null;for(let k=0;k<GA.tournament;k++){const c=ranked[Math.floor(Math.random()*ranked.length)];if(!best||c.score>best.score)best=c;}return best;}
 const sameWeights=(a,b)=>a.length===b.length&&a.every((v,i)=>v===b[i]);
 
+// ---------- Physik ----------
+// Haftungsgrenze (Kammscher Kreis): Die Reifen übertragen höchstens µ·g. Kurvenfahrt
+// hat Vorrang; was an Haftung übrig bleibt, steht für Gas oder Bremse zur Verfügung.
+// Verlangt die Lenkung mehr Seitenführung, rutscht der Wagen nach außen und verliert Tempo.
+const GRIP=1.5,A_MAX=GRIP*9.81*5;// µ = 1,5 · g in Einheiten/s² (1 m = 5 Einheiten)
+let physics='grip';
+const physicsLabel=()=>physics==='grip'?'mit Haftung '+String(GRIP).replace('.',',')+' g':'ohne Haftungsgrenze (v1)';
+
 // ---------- Zustand ----------
 let driverId='training',method='population',popSize=40;
 let incumbent=null,bestScore=-Infinity,bestProgress=0,attempt=1,generation=1,history=[],records=[],samples=[],testResults=[];
 let cars=[],leader=null,running=false,testMode=false,collision=null,acc=0,last=0,status='Bereit',connections=[];
-const keys={driver:id=>'racing-lab-v2-driver-'+id,course:'racing-lab-v2-course',active:'racing-lab-v2-active-driver',v1:'racing-lab-single-driver-v1'};
+const keys={driver:id=>'racing-lab-v2-driver-'+id+(physics==='grip'?'-grip':''),physics:'racing-lab-v2-physics',course:'racing-lab-v2-course',active:'racing-lab-v2-active-driver',v1:'racing-lab-single-driver-v1'};
 const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}},del:k=>{try{localStorage.removeItem(k)}catch(e){}}};
 const label=id=>courses[id].short||courses[id].name;
 
@@ -72,7 +80,7 @@ function saveCheckpoint(){
 function clearState(){incumbent=null;bestScore=-Infinity;bestProgress=0;attempt=1;generation=1;history=[];records=[];samples=[];testResults=[];}
 function restoreCheckpoint(id){
   clearState();
-  try{let raw=store.get(keys.driver(id)),fromV1=false;if(!raw&&id==='training'){raw=store.get(keys.v1);fromV1=!!raw;}if(!raw)return false;const data=JSON.parse(raw);
+  try{let raw=store.get(keys.driver(id)),fromV1=false;if(!raw&&id==='training'&&physics==='v1'){raw=store.get(keys.v1);fromV1=!!raw;}if(!raw)return false;const data=JSON.parse(raw);
     if(!Array.isArray(data.incumbent)||data.incumbent.length!==W||!data.incumbent.every(Number.isFinite)||!Number.isFinite(data.bestScore)||!Number.isFinite(data.bestProgress)||!Number.isSafeInteger(data.attempt))return false;
     incumbent=data.incumbent.slice();bestScore=data.bestScore;bestProgress=Math.max(0,Math.min(tracks[id].total,data.bestProgress));attempt=data.attempt;generation=Number.isSafeInteger(data.generation)?data.generation:1;
     history=Array.isArray(data.history)?data.history.filter(Number.isFinite).slice(-180):[];records=Array.isArray(data.records)?data.records.slice(-200):[];samples=Array.isArray(data.samples)?data.samples.slice(-1000):[];testResults=Array.isArray(data.testResults)?data.testResults.slice(-50):[];
@@ -82,11 +90,21 @@ function restoreCheckpoint(id){
 }
 
 // ---------- Fahrzeug ----------
-function makeCar(weights,id=0){const p=T.pts[0],n=T.pts[1],a=Math.atan2(n[1]-p[1],n[0]-p[0]);return {id,weights,x:p[0],y:p[1],a,v:0,omega:0,i:0,progress:0,max:0,time:0,stall:0,sensors:[],trail:[],sampleTick:-1,alive:true,score:null,reason:null,act:{input:Array(9).fill(0),hidden:Array(10).fill(0),output:[0,0]}};}
+function makeCar(weights,id=0){const p=T.pts[0],n=T.pts[1],a=Math.atan2(n[1]-p[1],n[0]-p[0]);return {id,weights,x:p[0],y:p[1],a,v:0,omega:0,i:0,progress:0,max:0,time:0,stall:0,slip:0,gripUse:0,sensors:[],trail:[],skids:[],sampleTick:-1,alive:true,score:null,reason:null,act:{input:Array(9).fill(0),hidden:Array(10).fill(0),output:[0,0]}};}
 function startGeneration(models){cars=models.map((w,k)=>makeCar(w,k));leader=cars[0];}
 function sense(c){return angles.map(angle=>{const dx=Math.cos(c.a+angle),dy=Math.sin(c.a+angle),win=T.sensorWindow;let dist=180;for(let k=c.i-win;k<c.i+win;k++)for(let side=0;side<2;side++){let p=T.edges[T.wrap(k)][side],q=T.edges[T.wrap(k+1)][side],sx=q[0]-p[0],sy=q[1]-p[1],den=dx*sy-dy*sx;if(Math.abs(den)<1e-8)continue;const px=p[0]-c.x,py=p[1]-c.y,t=(px*sy-py*sx)/den,u=(px*dy-py*dx)/den;if(t>=0&&u>=0&&u<=1)dist=Math.min(dist,t);}return dist;});}
 function advance(c){const dt=1/60;c.sensors=sense(c);const [steer,pedal]=predict([...c.sensors.map(v=>v/180),c.v/160,c.omega/4],c.weights,c.act);
-  c.v=Math.max(0,Math.min(170,c.v+(pedal*(pedal>0?85:140)-.13*c.v)*dt));c.omega=c.v/22*Math.tan(steer*.52);c.a+=c.omega*dt;c.x+=Math.cos(c.a)*c.v*dt;c.y+=Math.sin(c.a)*c.v*dt;c.time+=dt;
+  if(physics==='grip'){
+    const lat=Math.min(c.v*Math.abs(c.v/22*Math.tan(steer*.52)),A_MAX),avail=Math.sqrt(A_MAX*A_MAX-lat*lat);// Restbudget längs
+    const tire=Math.max(-avail,Math.min(avail,pedal*(pedal>0?85:140)));
+    c.v=Math.max(0,Math.min(170,c.v+(tire-.13*c.v)*dt));
+    const wanted=c.v/22*Math.tan(steer*.52);
+    if(c.v>0&&Math.abs(wanted)*c.v>A_MAX){const omegaMax=A_MAX/c.v;c.slip=1-omegaMax/Math.abs(wanted);c.omega=Math.sign(wanted)*omegaMax;c.v=Math.max(0,c.v-c.slip*.5*A_MAX*dt);}// Rutschen: Untersteuern + Reibverlust
+    else{c.slip=0;c.omega=wanted;}
+    c.gripUse=Math.hypot(tire,c.v*c.omega)/A_MAX;
+    if(c.slip>0){c.skids.push([c.x,c.y]);if(c.skids.length>400)c.skids.shift();}
+  }else{c.v=Math.max(0,Math.min(170,c.v+(pedal*(pedal>0?85:140)-.13*c.v)*dt));c.omega=c.v/22*Math.tan(steer*.52);c.slip=0;c.gripUse=Math.hypot(pedal*(pedal>0?85:140),c.v*c.omega)/A_MAX;}
+  c.a+=c.omega*dt;c.x+=Math.cos(c.a)*c.v*dt;c.y+=Math.sin(c.a)*c.v*dt;c.time+=dt;
   if(c===leader&&Math.floor(c.time*5)!==c.sampleTick){c.sampleTick=Math.floor(c.time*5);samples.push({attempt,generation,testMode,trackId,driverId:c.id,time:c.time,inputs:c.act.input.slice(),hidden:c.act.hidden.slice(),outputs:c.act.output.slice()});if(samples.length>10000)samples.shift();}
   const previous=c.trail.length?c.trail[c.trail.length-1]:T.pts[0],old=nearest(previous[0],previous[1],c.i,5),n=nearest(c.x,c.y,c.i,7);let delta=n.s-old.s;if(delta<-T.total/2)delta+=T.total;if(delta>T.total/2)delta-=T.total;c.progress+=delta;c.i=n.i;
   if(c.progress>c.max+.05){c.max=c.progress;c.stall=0}else c.stall+=dt;c.trail.push([c.x,c.y]);if(c.trail.length>160)c.trail.shift();
@@ -126,7 +144,7 @@ function step(){
 }
 
 // ---------- Tests auf anderen Strecken ----------
-function recordTest(c){const result={trackId,course:courses[trackId].name,driver:'Fahrer '+label(driverId),progressPercent:Math.max(0,Math.min(100,c.max/T.total*100)),time:c.time,completed:c.reason==='Runde geschafft!',reason:c.reason,weightsUnchanged:true};testResults.push(result);if(testResults.length>50)testResults.shift();showTestResults();saveCheckpoint();status='Test beendet · '+c.reason;$('status').textContent=status;return result;}
+function recordTest(c){const result={trackId,course:courses[trackId].name,driver:'Fahrer '+label(driverId)+(physics==='grip'?' · Haftung':''),progressPercent:Math.max(0,Math.min(100,c.max/T.total*100)),time:c.time,completed:c.reason==='Runde geschafft!',reason:c.reason,weightsUnchanged:true};testResults.push(result);if(testResults.length>50)testResults.shift();showTestResults();saveCheckpoint();status='Test beendet · '+c.reason;$('status').textContent=status;return result;}
 function showTestResults(){const valid=testResults.filter(r=>r&&courses[r.trackId]&&typeof r.driver==='string'&&Number.isFinite(r.progressPercent)&&Number.isFinite(r.time));$('transferResults').textContent=valid.slice(-10).map(r=>r.course+' | '+r.driver+' | '+r.progressPercent.toFixed(1)+' % | '+r.time.toFixed(2)+' s | '+r.reason).join('\n')||'Noch keine Testfahrt abgeschlossen.';}
 function beginTest(){if(!incumbent){$('status').textContent='Zuerst einen Fahrer trainieren oder einen JSON-Stand laden.';return;}
   running=true;testMode=true;collision=null;acc=0;startGeneration([incumbent.slice()]);$('status').textContent='Unverändertes bestes Netz ('+label(driverId)+') auf '+courses[trackId].name+' · kein Lernen während des Tests.';}
@@ -142,6 +160,9 @@ function switchCourse(id){if(!courses[id])return;running=false;testMode=false;co
 function switchDriver(id){if(!courses[id]||!courses[id].trainable)return;saveCheckpoint();running=false;testMode=false;driverId=id;$('driver').value=id;store.set(keys.active,id);
   if(!restoreCheckpoint(id)){$('logCount').textContent='0 protokollierte Versuche';$('storageStatus').textContent='Fahrer „'+label(id)+'“ ist noch untrainiert.';}
   showTestResults();idleCars();updateNotice();$('status').textContent='Fahrer „'+label(id)+'“ aktiv.';}
+function switchPhysics(p){p=p==='v1'?'v1':'grip';saveCheckpoint();running=false;testMode=false;physics=p;$('physics').value=p;store.set(keys.physics,p);
+  if(!restoreCheckpoint(driverId)){$('logCount').textContent='0 protokollierte Versuche';$('storageStatus').textContent='Fahrer „'+label(driverId)+'“ ist '+physicsLabel()+' noch untrainiert.';}
+  showTestResults();idleCars();updateNotice();$('status').textContent='Physik: '+physicsLabel()+'. Jede Physik hat eigene Fahrerstände.';}
 function setMethod(m){method=m==='single'?'single':'population';$('method').value=method;updateNotice();}
 
 // ---------- Zeichnen ----------
@@ -161,7 +182,8 @@ function drawScene(g,s,ox,oy,w,h){
     g.strokeStyle='#eb7658';g.lineWidth=kerb;g.setLineDash([12,12]);for(const side of [1,-1]){edgePath(g,side,kerb/2);g.stroke();}g.setLineDash([]);bandPath(g,0);g.fillStyle='#4a5c60';g.fill('evenodd');}
   centerPath(g);g.strokeStyle='#87908a';g.lineWidth=px;g.setLineDash([12,14]);g.stroke();g.setLineDash([]);
   const p=T.pts[0],n=T.pts[1],wr=T.halfW[0][0],wl=T.halfW[0][1],sq=(wr+wl)/8;g.save();g.translate(...p);g.rotate(Math.atan2(n[1]-p[1],n[0]-p[0]));g.scale(Math.max(1,2*px/5),1);for(let i=0;i<8;i++)for(let j=0;j<2;j++){g.fillStyle=(i+j)%2?'#fff9e8':'#26373a';g.fillRect(-5+j*5,-wl+i*sq,5,sq)}g.restore();
-  const lead=leader;if(lead&&lead.trail.length){g.beginPath();lead.trail.forEach((p,i)=>i?g.lineTo(...p):g.moveTo(...p));g.strokeStyle='#f6b66680';g.lineWidth=2*px;g.stroke();}
+  const lead=leader;if(lead&&lead.skids.length){g.fillStyle='#2a2a2a55';for(const [x,y] of lead.skids)g.fillRect(x-1.5,y-1.5,3,3);}// Rutschspuren
+  if(lead&&lead.trail.length){g.beginPath();lead.trail.forEach((p,i)=>i?g.lineTo(...p):g.moveTo(...p));g.strokeStyle='#f6b66680';g.lineWidth=2*px;g.stroke();}
   if(lead&&$('rays').checked){g.strokeStyle='#d7ed9bb0';g.lineWidth=1.5*px;lead.sensors.forEach((d,i)=>{g.beginPath();g.moveTo(lead.x,lead.y);g.lineTo(lead.x+Math.cos(lead.a+angles[i])*d,lead.y+Math.sin(lead.a+angles[i])*d);g.stroke();});}
   g.globalAlpha=.4;for(const c of cars)if(c.alive&&c!==lead)paintCar(g,c,'#f3a27f',k);g.globalAlpha=1;
   if(lead)paintCar(g,lead,'#fa7644',k);
@@ -177,6 +199,7 @@ function draw(){
   // Wagenkamera: eigene Darstellung der Welt, zentriert auf den führenden Wagen.
   const fs=1.6;drawScene(fx,fs,160-lead.x*fs,80-lead.y*fs,320,160);
   const [steer,pedal]=lead.act.output,alive=cars.filter(c=>c.alive).length;
+  $('gripUse').textContent=lead.gripUse.toFixed(2)+(lead.slip>0?' · rutscht!':physics==='v1'&&lead.gripUse>1?' · (ohne Grenze)':'');$('gripbar').style.width=Math.min(100,lead.gripUse*100)+'%';$('gripbar').style.background=lead.slip>0||lead.gripUse>1?'#c4302b':'#f47342';
   $('attempt').textContent=method==='single'||testMode?attempt:generation;$('speed').textContent=Math.round(lead.v*.2*3.6)+' km/h';$('progress').textContent=Math.max(0,Math.min(100,lead.progress/T.total*100)).toFixed(1)+' %';$('best').textContent=(bestProgress/tracks[driverId].total*100).toFixed(1)+' %';
   $('steer').textContent=steer.toFixed(2);$('pedal').textContent=pedal.toFixed(2);$('steerbar').style.width=(steer+1)*50+'%';$('pedalbar').style.width=(pedal+1)*50+'%';
   $('popInfo').textContent=testMode?'Testfahrt · ein Wagen mit eingefrorenen Gewichten':method==='single'?'Einzelwagen · Hill Climbing wie v1':alive+' von '+cars.length+' Wagen unterwegs · Generation '+generation+' · '+attempt+' Fahrten gesamt';
@@ -194,13 +217,14 @@ nc.onclick=e=>{const r=nc.getBoundingClientRect(),x=(e.clientX-r.left)*1100/r.wi
 
 // ---------- Export / Import ----------
 function download(name,data,type){const u=URL.createObjectURL(new Blob([data],{type})),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);}
-$('exportLog').onclick=()=>download('racing-training-'+driverId+'.json',JSON.stringify({formatVersion:1,app:'racing-lab-v2',algorithm:method==='single'?'sequential random mutation with elitist selection':'genetic algorithm: elitism, tournament selection, neuron-block crossover, mutation',population:method==='single'?1:popSize,generation,architecture:[9,10,2],weightLayout:'hidden: bias then 9 inputs per neuron; output: bias then 10 hidden per neuron',reward:'min(progress, lap) - 0.6*time + 500 for completed lap',sensorRange:180,track:T.pts,trackId,courseProfiles:Object.entries(courses).map(([id,c])=>({id,name:c.name,nodes:c.nodes||null})),trainingTrackId:driverId,bestProgress,trainingLength:tracks[driverId].total,testResults,bestScore:Number.isFinite(bestScore)?bestScore:null,bestWeights:incumbent,currentWeights:(leader||cars[0]).weights,records:records.slice(-2000),samples},null,2),'application/json');
+$('exportLog').onclick=()=>download('racing-training-'+driverId+'.json',JSON.stringify({formatVersion:1,app:'racing-lab-v2',algorithm:method==='single'?'sequential random mutation with elitist selection':'genetic algorithm: elitism, tournament selection, neuron-block crossover, mutation',population:method==='single'?1:popSize,generation,physics:physics==='grip'?{model:'kamm',grip:GRIP}:{model:'v1'},architecture:[9,10,2],weightLayout:'hidden: bias then 9 inputs per neuron; output: bias then 10 hidden per neuron',reward:'min(progress, lap) - 0.6*time + 500 for completed lap',sensorRange:180,track:T.pts,trackId,courseProfiles:Object.entries(courses).map(([id,c])=>({id,name:c.name,nodes:c.nodes||null})),trainingTrackId:driverId,bestProgress,trainingLength:tracks[driverId].total,testResults,bestScore:Number.isFinite(bestScore)?bestScore:null,bestWeights:incumbent,currentWeights:(leader||cars[0]).weights,records:records.slice(-2000),samples},null,2),'application/json');
 $('exportCsv').onclick=()=>download('racing-versuche-'+driverId+'.csv','attempt,generation,car,score,time,progress,improved,reason\n'+records.map(r=>[r.attempt,r.generation??'',r.car??0,r.score,r.time,r.progress,r.improved,r.reason].join(',')).join('\n'),'text/csv');
 $('importLog').onclick=()=>$('importFile').click();
 $('importFile').onchange=async e=>{
   const file=e.target.files?.[0];if(!file)return;
   try{const data=JSON.parse(await file.text());
     if(data.formatVersion!==1||JSON.stringify(data.architecture)!=='[9,10,2]'||!Array.isArray(data.bestWeights)||data.bestWeights.length!==W||!data.bestWeights.every(Number.isFinite)||!Number.isFinite(data.bestScore))throw Error('Datei enthält keinen gültigen trainierten Fahrer.');
+    const phys=data.physics&&data.physics.model==='kamm'?'grip':'v1';if(phys==='grip'&&data.physics.grip!==GRIP)throw Error('Fahrer wurde mit Haftung '+data.physics.grip+' g trainiert, diese Seite rechnet mit '+GRIP+' g.');if(phys!==physics)switchPhysics(phys);
     const target=courses[data.trainingTrackId]&&courses[data.trainingTrackId].trainable?data.trainingTrackId:'training';
     switchDriver(target);switchCourse(target);
     incumbent=data.bestWeights.slice();bestScore=data.bestScore;records=Array.isArray(data.records)?data.records.filter(r=>r&&Number.isSafeInteger(r.attempt)&&Number.isFinite(r.score)&&Number.isFinite(r.progress)&&Number.isFinite(r.time)).slice(-200):[];samples=Array.isArray(data.samples)?data.samples.slice(-1000):[];testResults=Array.isArray(data.testResults)?data.testResults.slice(-50):[];showTestResults();
@@ -213,6 +237,7 @@ $('importFile').onchange=async e=>{
 
 // ---------- Bedienung ----------
 $('courseSelect').onchange=e=>switchCourse(e.target.value);
+$('physics').onchange=e=>switchPhysics(e.target.value);
 $('driver').onchange=e=>switchDriver(e.target.value);
 $('method').onchange=e=>{setMethod(e.target.value);if(running&&!testMode){running=false;$('status').textContent='Lernverfahren geändert · Training neu starten.';}};
 $('popSize').onchange=e=>{popSize=Number(e.target.value)||40;};
@@ -223,10 +248,10 @@ $('reset').onclick=()=>{running=false;testMode=false;collision=null;clearState()
 
 // ---------- Start ----------
 if(!courses.nuerburgring){const o=[...$('courseSelect').options].find(o=>o.value==='nuerburgring');if(o)o.remove();const d=[...$('driver').options].find(o=>o.value==='nuerburgring');if(d)d.remove();}
-{const savedDriver=store.get(keys.active);driverId=savedDriver&&courses[savedDriver]&&courses[savedDriver].trainable?savedDriver:'training';$('driver').value=driverId;restoreCheckpoint(driverId);showTestResults();
+{const savedPhysics=store.get(keys.physics);physics=savedPhysics==='v1'?'v1':'grip';$('physics').value=physics;const savedDriver=store.get(keys.active);driverId=savedDriver&&courses[savedDriver]&&courses[savedDriver].trainable?savedDriver:'training';$('driver').value=driverId;restoreCheckpoint(driverId);showTestResults();
   const savedCourse=store.get(keys.course);switchCourse(savedCourse&&courses[savedCourse]?savedCourse:driverId);if(incumbent)$('status').textContent='Bester Fahrer „'+label(driverId)+'“ geladen · Training kann weitergehen.';}
 function frame(t){if(last&&running){acc+=Math.min((t-last)/1000,.1)*Number($('rate').value);const t0=Date.now();let count=0;while(acc>=1/60&&count++<2000&&running){step();acc-=1/60;if(Date.now()-t0>14){acc=0;break;}}}else acc=0;last=t;draw();network();requestAnimationFrame(frame)}requestAnimationFrame(frame);
 // Deterministisches Schrittweise-Ausführen für lokale Prüfungen; keine externen Dienste.
-window.racingLab={step,reset:()=>{$('reset').onclick()},switchCourse,switchDriver,setMethod,setPopulation:n=>{popSize=n;},beginTest,courseProfiles:()=>JSON.parse(JSON.stringify(courses)),
-  stats:()=>({trackId,driverId,method,running,testMode,incumbent:incumbent?.slice(),testResults:testResults.slice(),attempt,generation,bestScore,bestProgress,total:T.total,history:history.slice(),cars:cars.length,alive:cars.filter(c=>c.alive).length,car:{...(leader||cars[0])},weights:(leader||cars[0]).weights.slice()})};
+window.racingLab={step,reset:()=>{$('reset').onclick()},switchCourse,switchDriver,switchPhysics,setMethod,setPopulation:n=>{popSize=n;},beginTest,courseProfiles:()=>JSON.parse(JSON.stringify(courses)),
+  stats:()=>({trackId,driverId,method,physics,running,testMode,incumbent:incumbent?.slice(),testResults:testResults.slice(),attempt,generation,bestScore,bestProgress,total:T.total,history:history.slice(),cars:cars.length,alive:cars.filter(c=>c.alive).length,car:{...(leader||cars[0])},weights:(leader||cars[0]).weights.slice()})};
 })();

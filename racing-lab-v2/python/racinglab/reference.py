@@ -12,6 +12,7 @@ DT = 1 / 60                                           # fester Zeitschritt
 ANGLES = [-1.55, -1.05, -.5, 0, .5, 1.05, 1.55]       # Sensorrichtungen relativ zum Wagen (rad)
 SENSOR_RANGE = 180                                    # 36 m
 N_WEIGHTS = 122                                       # 10×(1+9) + 2×(1+10)
+G = 9.81 * 5                                          # Erdbeschleunigung in Einheiten/s² (1 m = 5 Einheiten)
 
 
 def predict(inputs, w):
@@ -44,6 +45,8 @@ class Car:
     max: float = 0.0
     time: float = 0.0
     stall: float = 0.0
+    slip: float = 0.0      # 0 = haftet, >0 = rutscht (Anteil der nicht umsetzbaren Drehrate)
+    grip_use: float = 0.0  # genutzte Haftung: |Beschleunigung| / (µ·g)
     sensors: list = field(default_factory=list)
     last: tuple = None     # Position im vorigen Schritt
 
@@ -92,13 +95,44 @@ def sense(track, c):
     return out
 
 
-def advance(track, c, w):
-    """Ein Zeitschritt. Gibt den Abbruchgrund zurück oder None."""
+def physics_grip(c, steer, pedal, a_max):
+    """Haftungsgrenze nach dem Kammschen Kreis: Die Reifen übertragen höchstens a_max.
+
+    1. Kurvenfahrt hat Vorrang: Querbeschleunigung = v · Drehrate (höchstens a_max).
+    2. Für Gas/Bremse bleibt nur der Rest: sqrt(a_max² − quer²).
+    3. Verlangt die Lenkung mehr als a_max, rutscht der Wagen: Die Drehrate wird auf
+       a_max / v begrenzt (er schiebt nach außen) und Reibung kostet Tempo.
+    """
+    lat = min(c.v * abs(c.v / 22 * math.tan(steer * .52)), a_max)
+    avail = math.sqrt(a_max * a_max - lat * lat)
+    tire = max(-avail, min(avail, pedal * (85 if pedal > 0 else 140)))
+    c.v = max(0, min(170, c.v + (tire - .13 * c.v) * DT))
+    wanted = c.v / 22 * math.tan(steer * .52)
+    if c.v > 0 and abs(wanted) * c.v > a_max:
+        omega_max = a_max / c.v
+        c.slip = 1 - omega_max / abs(wanted)
+        c.omega = math.copysign(omega_max, wanted)
+        c.v = max(0, c.v - c.slip * .5 * a_max * DT)
+    else:
+        c.slip, c.omega = 0, wanted
+    c.grip_use = math.hypot(tire, c.v * c.omega) / a_max
+
+
+def advance(track, c, w, grip=0.0):
+    """Ein Zeitschritt. Gibt den Abbruchgrund zurück oder None.
+
+    grip = 0: Physik wie v1 (keine Haftungsgrenze).
+    grip > 0: Kammscher Kreis mit µ = grip, siehe physics_grip().
+    """
     c.sensors = sense(track, c)
     steer, pedal = predict([s / 180 for s in c.sensors] + [c.v / 160, c.omega / 4], w)
-    # Fahrzeugmodell (kinematisch, ohne Reifenhaftung)
-    c.v = max(0, min(170, c.v + (pedal * (85 if pedal > 0 else 140) - .13 * c.v) * DT))
-    c.omega = c.v / 22 * math.tan(steer * .52)
+    if grip:
+        physics_grip(c, steer, pedal, grip * G)
+    else:
+        # Fahrzeugmodell v1 (kinematisch, ohne Reifenhaftung)
+        c.v = max(0, min(170, c.v + (pedal * (85 if pedal > 0 else 140) - .13 * c.v) * DT))
+        c.omega = c.v / 22 * math.tan(steer * .52)
+        c.slip, c.grip_use = 0, math.hypot(pedal * (85 if pedal > 0 else 140), c.v * c.omega) / (1.5 * G)
     c.a += c.omega * DT
     c.x += math.cos(c.a) * c.v * DT
     c.y += math.sin(c.a) * c.v * DT
@@ -134,11 +168,11 @@ def score(track, c):
     return min(c.progress, track.total) - c.time * .6 + (500 if c.progress >= track.total else 0)
 
 
-def drive(track, w, on_step=None):
+def drive(track, w, grip=0.0, on_step=None):
     """Fährt einen kompletten Versuch und gibt (Wagen, Grund, Score) zurück."""
     c = start_car(track)
     while True:
-        reason = advance(track, c, w)
+        reason = advance(track, c, w, grip)
         if on_step:
             on_step(c)
         if reason:

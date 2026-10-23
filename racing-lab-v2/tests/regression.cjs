@@ -24,7 +24,7 @@ function boot() {
     }),
     set: (obj, field, value) => (obj[field] = value, true),
   });
-  const defaults = {rate: '1', popSize: '40', method: 'population', driver: 'training'};
+  const defaults = {rate: '1', popSize: '40', method: 'population', driver: 'training', physics: 'grip'};
   const el = id => elements[id] ??= {
     getContext: () => context, checked: true, style: {}, options: [],
     value: defaults[id] ?? 'training', textContent: '', attributes: {},
@@ -142,15 +142,44 @@ async function run() {
   lab.switchDriver('training');
   same(lab.stats().incumbent && lab.stats().incumbent.length, 122);
 
-  // 6) Neustart lädt Zustand; "Neu beginnen" löscht nur den aktiven Fahrer.
+  // 6) Haftungsgrenze: eigene Fahrerstände je Physik, Training läuft.
+  lab.switchPhysics('grip');
+  assert.equal(lab.stats().physics, 'grip');
+  assert.equal(lab.stats().incumbent, undefined);
+  lab.switchCourse('training');
+  el('toggle').onclick();
+  runUntil(lab, () => lab.stats().generation > 1, 20000);
+  assert.equal(lab.stats().generation, 2);
+  assert(saved.has('racing-lab-v2-driver-training-grip'));
+  render();
+  lab.switchPhysics('v1');
+  assert.equal(lab.stats().bestScore >= baseline.bestScore, true);
+
+  // 7) Neustart lädt Zustand; "Neu beginnen" löscht nur den aktiven Fahrer.
   const reloaded = boot();
   assert.equal(reloaded.lab.stats().driverId, 'training');
   reloaded.lab.reset();
   assert.equal(saved.has('racing-lab-v2-driver-training'), false);
   assert(saved.has('racing-lab-v2-driver-nuerburgring'));
   assert.equal(reloaded.lab.stats().generation, 1);
+  // 8) Parität Python → Browser: Jeder in Python trainierte Fahrer fährt hier dieselbe Zeit.
+  const dir = path.join(root, 'fahrer');
+  for (const f of fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => f.endsWith('.json')) : []) {
+    const data = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+    const ref = (data.testResults || []).at(-1);
+    if (!ref) continue;
+    await load(reloaded.el, data);
+    assert.equal(reloaded.lab.stats().physics, data.physics?.model === 'kamm' ? 'grip' : 'v1', f);
+    reloaded.lab.switchCourse(ref.trackId); reloaded.lab.beginTest();
+    runUntil(reloaded.lab, () => !reloaded.lab.stats().running, 60000);
+    const got = reloaded.lab.stats().testResults.at(-1);
+    assert.equal(got.reason, ref.reason, f);
+    assert(Math.abs(got.time - ref.time) < 1e-9, `${f}: ${got.time} vs Python ${ref.time}`);
+    console.log(`  Parität Python → Browser ${f.padEnd(36)} ${got.time.toFixed(4)} s ✓`);
+  }
   console.log('PASS: v1-Parität, 6 Strecken, eingefrorene Testgewichte, Population (Generation 1→2),');
-  console.log('      Einzelwagen-Modus, getrennte Fahrer, Import/Export, Neustart/Reset.');
+  console.log('      Einzelwagen-Modus, getrennte Fahrer, Haftungsgrenze, Import/Export,');
+  console.log('      Neustart/Reset, Parität Python → Browser.');
   console.log('Hinweis: Rechen- und Zustandstests mit DOM-Ersatz; keine Pixelprüfung.');
 }
 run().catch(err => { console.error(err); process.exitCode = 1; });

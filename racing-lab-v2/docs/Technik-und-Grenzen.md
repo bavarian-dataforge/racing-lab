@@ -76,18 +76,30 @@ Gespeicherte v1-Scores können deshalb um bis zu ~3 Punkte höher sein als neu b
 - Darstellung: Übersicht 1,44 m pro Pixel. Die Wagen werden dort vergrößert gezeichnet,
   sonst wären sie nur einen Pixel groß. Die Wagenkamera zeigt den echten Maßstab.
 
-## Wichtige Grenze: keine Reifenhaftung
+## Haftungsgrenze (v2.1)
 
-Das Fahrzeugmodell begrenzt nur den Lenkwinkel, nicht die Querbeschleunigung. Der
-kleinste Kurvenradius beträgt bei jedem Tempo 22 / tan(0,52) ≈ 38 Einheiten ≈ 7,7 m.
-Ein Wagen muss deshalb **nie bremsen**. Flos v1-Fahrer umrundet den Nürburgring in
-151,7 s mit durchschnittlich ~122 km/h, also fast immer mit Höchstgeschwindigkeit.
-Ein echter Formelwagen könnte das so nicht.
+Wählbar über **Physik**: „mit Haftungsgrenze 1,5 g“ (Standard) oder „ohne Haftungsgrenze (v1)“.
+Jede Physik hat eigene Fahrerstände (`…-grip` im Speicherschlüssel). JSON-Dateien tragen
+`physics: {model: "kamm", grip: 1.5}`, und der Import schaltet passend um.
 
-Sinnvolle Erweiterung: maximale Querbeschleunigung (z. B. `v² / r ≤ µ·g`). Bei zu
-schneller Kurvenfahrt rutscht der Wagen dann nach außen. Erst dadurch wird das
-Fahrpedal mit Bremsen wirklich wichtig. Das ändert die Physik: Vergleiche mit v1 sind
-danach nicht mehr direkt möglich.
+**Modell: Kammscher Kreis.** Die Reifen übertragen höchstens `a_max = µ·g = 1,5 · 9,81 m/s²`.
+
+```text
+quer      = min(v · |gewünschte Drehrate|, a_max)     Kurvenfahrt hat Vorrang
+rest      = sqrt(a_max² − quer²)                       Budget für Gas/Bremse
+reifen    = Fahrpedal-Beschleunigung, begrenzt auf ±rest
+v         = v + (reifen − 0,13·v)·dt                   Luftwiderstand ist nicht reifenbegrenzt
+Drehrate  = gewünscht, höchstens a_max / v             mehr geht nicht → Wagen schiebt nach außen
+Rutschen  = 1 − (a_max/v) / |gewünscht|  (0…1)
+v         = v − Rutschen · 0,5 · a_max · dt             Reibverlust beim Rutschen
+```
+
+Folgen: Bei 34 m/s braucht eine Kurve mindestens 78 m Radius. Engere Kurven gehen nur
+mit weniger Tempo, und im Kurvenscheitel bleibt kaum Haftung zum Bremsen. Deshalb muss
+vorher gebremst werden. Netz, Eingänge und Gewichtsformat bleiben unverändert (9–10–2).
+Das Netz „spürt“ das Rutschen nur indirekt über Drehrate und Tempo.
+
+Messwerte und Beobachtungen stehen in `Validierung.md`.
 
 ## Weitere Grenzen
 

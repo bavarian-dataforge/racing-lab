@@ -195,6 +195,20 @@ Das Paket enthält die ausführbare Oberfläche, den Simulationscode, Startanlei
   - [ ] Mehrere Seeds je Einstellung vergleichen statt Einzelläufen.
   - [ ] PPO über eine `gymnasium`-Umgebung um `reference.advance()`.
 
+## 13. v2.1: Haftungsgrenze
+
+- **Ziel:** Bremsen soll wichtig werden. Vorher konnte jeder Wagen jede Kurve mit Höchsttempo fahren.
+- **Änderung:** Kammscher Kreis mit µ = 1,5 g, Browser und Python gleich, umschaltbar. Rutschen schiebt den Wagen nach außen und kostet Tempo. Rutschspuren und eine Anzeige „Haftung genutzt“ zeigen das.
+- **Versionsverwaltung:** Git-Repo mit Tags `v1.0`, `v2.0`, `v2.1`.
+- **Beobachtungen:**
+  - Flos v1-Fahrer schafft mit Haftung nur noch die weiten Bögen.
+  - Neu trainiert: Testkurs 01 in 24,52 s (vorher 16,10 s), Nürburgring in 177,47 s (vorher 151,00 s).
+  - Der GA bremst wenig und rutscht viel: Er nutzt das Rutschen als Bremse.
+- **Erkenntnis:** Ein Lernverfahren nutzt jede Lücke des Modells. Was „richtiges“ Fahren ist, legen Physik und Bewertung fest.
+- **Offene Punkte:**
+  - [ ] Rutschen teurer machen (Score-Abzug oder Kontrollverlust) und erneut vergleichen.
+  - [ ] Rutschen als zusätzlichen Netzeingang prüfen (ändert die Architektur).
+
 ## Technische Vereinfachungen
 
 Das Fahrzeug verwendet ein vereinfachtes kinematisches Modell mit Lenkung, Beschleunigen, Bremsen und geschwindigkeitsabhängigem Widerstand. Es werden keine Federung, Dämpfung, Reifenschlupf, Motorkennfelder oder Drehzahl simuliert.

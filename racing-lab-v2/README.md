@@ -13,6 +13,8 @@ Neu in v2:
 - **Zwei Fahrer** mit getrennten Ständen: „trainiert auf Testkurs 01“ und „trainiert
   auf Nürburgring“. Jeder kann auf allen sechs Strecken geprüft werden.
 - **Python-Version** in `python/`, bitgenau gleich wie der Browser (siehe `python/README.md`).
+- **Haftungsgrenze (v2.1):** Kammscher Kreis mit 1,5 g. Zu schnelle Wagen rutschen in Kurven
+  nach außen, Bremsen wird wichtig. Umschaltbar auf die v1-Physik ohne Grenze.
 - Bewertungsfehler behoben: Der Fortschritt zählt höchstens eine Runde (Details in `docs/Technik-und-Grenzen.md`).
 
 Physik, Sensoren, Netz (9–10–2) und Gewichtsformat sind identisch mit v1. Ein in v1
@@ -33,6 +35,7 @@ Danach <http://127.0.0.1:8000> öffnen.
 | Element | Verhalten |
 | --- | --- |
 | Fahrer | Welcher Fahrer aktiv ist. Training nur, wenn Strecke = Trainingsstrecke des Fahrers. |
+| Physik | mit Haftungsgrenze 1,5 g oder ohne (v1); eigene Fahrerstände je Physik |
 | Lernverfahren | Population (genetischer Algorithmus) oder Einzelwagen wie in v1 |
 | Wagen | Populationsgröße 20 / 40 / 80; gilt ab dem nächsten Trainingsstart |
 | Zeitraffer | zusätzlich 120×; die Rechenzeit je Bild ist begrenzt, die Seite bleibt bedienbar |

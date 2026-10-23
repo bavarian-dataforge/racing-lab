@@ -74,3 +74,36 @@ später: auf mehreren Strecken gleichzeitig bewerten oder Startbedingungen varii
 
 Keine Pixelvergleiche. Die Lernkurven hängen vom Zufall (Seed) ab. Einzelne Läufe sind
 Beispiele und keine Erfolgsquote.
+
+## v2.1 · Haftungsgrenze 1,5 g
+
+### Ohne Bremsen geht es nicht mehr
+
+Flos v1-Fahrer (eingefroren) mit Haftungsgrenze: Er schafft nur noch Testkurs 03 (weite
+Bögen, 17,80 s). Auf allen anderen Strecken rutscht er in der ersten engen Kurve gegen die
+Wand: Kurs 01 43 %, Kurs 02 39 %, Kurs 04 17 %, Kurs 05 13 %, Nürburgring 8 %. Mit alter
+Physik fährt er unverändert seine v1-Zeiten (Parität geprüft).
+
+### Training mit Haftung (Python, Seed 1, 40 Wagen)
+
+| Strecke | erste Runde | Endzeit mit Haftung | ohne Haftung (v2.0) |
+| --- | --- | --- | --- |
+| Testkurs 01, 60 Gen. | Generation 10 (40,30 s) | 24,52 s | 16,10 s |
+| Nürburgring, 80 Gen. | Generation 9 (222,72 s) | 177,47 s | 151,00 s |
+
+Beide Fahrer fahren im Browser-Code exakt dieselbe Zeit (`tests/regression.cjs`, Abschnitt 8).
+
+### Fahrverhalten (Anteil der Fahrzeit)
+
+| Fahrer | bremst (Pedal < 0) | rutscht | Tempo |
+| --- | --- | --- | --- |
+| Flo v1, Nürburgring, ohne Haftung | 0 % | 0 % | 58–122 km/h |
+| GA Nürburgring, mit Haftung | 1,7 % | 12 % | 42–122 km/h |
+| GA Testkurs 01, mit Haftung | 5,0 % | 46 % | 45–122 km/h |
+
+**Erkenntnis:** Mit Haftung fahren die Wagen langsamer in Kurven und bremsen teilweise.
+Der genetische Algorithmus hat aber vor allem entdeckt, dass Rutschen Tempo kostet, und
+setzt es gezielt als Bremse ein (Drift). Das ist im Modell erlaubt, weil Rutschen nur Tempo
+kostet und keinen Kontrollverlust bedeutet. Wer echtes Bremsverhalten erzwingen will,
+müsste Rutschen teurer machen, z. B. durch Abzug im Score, Drehen des Wagens oder
+weniger Seitenführung beim Rutschen. Das ist eine bewusste Modellentscheidung für später.

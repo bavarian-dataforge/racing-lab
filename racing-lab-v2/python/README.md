@@ -33,6 +33,12 @@ Fahrer auf dem Nürburgring trainieren:
 python3 train.py --track nuerburgring --generations 40 --seed 1
 ```
 
+Ohne Haftungsgrenze, also Physik wie v1 (Standard ist `--grip 1.5`):
+
+```bash
+python3 train.py --track training --grip 0
+```
+
 Mit Vorwissen starten, also vom Fahrer aus Testkurs 01 aus weitertrainieren:
 
 ```bash

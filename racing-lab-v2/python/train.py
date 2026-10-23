@@ -3,7 +3,8 @@
 Jede Generation fahren alle Wagen parallel auf mehreren CPU-Kernen. Das Ergebnis
 ist eine JSON-Datei, die der Browser über „JSON-Stand laden“ übernimmt.
 
-  python3 train.py --track training --generations 30
+  python3 train.py --track training --generations 30              # mit Haftungsgrenze 1,5 g
+  python3 train.py --track training --grip 0                       # Physik wie v1, ohne Haftungsgrenze
   python3 train.py --track nuerburgring --generations 40 --pop 40 --seed 7
   python3 train.py --track nuerburgring --init ../../racing-training.json   # Vorwissen nutzen
 """
@@ -16,31 +17,35 @@ from multiprocessing import Pool
 from racinglab import reference, tracks
 from racinglab.ga import Evolution
 
-_track = None
+_track, _grip = None, 0.0
 
 
-def _init(track_id):
-    global _track
-    _track = tracks.load(track_id)
+def _init(track_id, grip):
+    global _track, _grip
+    _track, _grip = tracks.load(track_id), grip
 
 
 def evaluate(w):
-    car, reason, score = reference.drive(_track, w)
+    car, reason, score = reference.drive(_track, w, _grip)
     return score, car.max, car.time, reason
 
 
-def export(path, args, track, best, gen, log):
+def physics(grip):
+    return {"model": "kamm", "grip": grip} if grip else {"model": "v1"}
+
+
+def export(path, args, track, best, gen, log, tests=()):
     data = {
         "formatVersion": 1, "app": "racing-lab-v2-python",
         "algorithm": "genetic algorithm: elitism, tournament selection, neuron-block crossover, mutation",
-        "population": args.pop, "generation": gen, "seed": args.seed,
+        "population": args.pop, "generation": gen, "seed": args.seed, "physics": physics(args.grip),
         "architecture": [9, 10, 2],
         "weightLayout": "hidden: bias then 9 inputs per neuron; output: bias then 10 hidden per neuron",
         "reward": "min(progress, lap) - 0.6*time + 500 for completed lap", "sensorRange": 180,
         "trackId": track.id, "trainingTrackId": track.id,
         "bestProgress": best["progress"], "trainingLength": track.total,
         "bestScore": best["score"], "bestWeights": best["weights"],
-        "records": log, "samples": [], "testResults": [],
+        "records": log, "samples": [], "testResults": list(tests),
     }
     with open(path, "w") as f:
         json.dump(data, f, indent=1)
@@ -52,6 +57,7 @@ def main():
     p.add_argument("--pop", type=int, default=40, help="Wagen je Generation")
     p.add_argument("--generations", type=int, default=30)
     p.add_argument("--seed", type=int, default=1, help="Zufallsstart – gleicher Seed, gleiches Ergebnis")
+    p.add_argument("--grip", type=float, default=1.5, help="Haftung µ in g (0 = Physik wie v1)")
     p.add_argument("--init", help="JSON eines vorhandenen Fahrers als Startpunkt")
     p.add_argument("--out", help="Zieldatei (Standard: fahrer-<strecke>-seed<seed>.json)")
     p.add_argument("--workers", type=int, default=os.cpu_count())
@@ -64,9 +70,10 @@ def main():
     population = evo.first_generation(args.pop, start)
     best = {"score": float("-inf"), "progress": 0, "weights": None}
     log = []
-    print(f"{track.name} · {track.total * .2:.0f} m · {args.pop} Wagen · Seed {args.seed} · {args.workers} Kerne\n")
+    phys = f"Haftung {args.grip} g" if args.grip else "ohne Haftungsgrenze"
+    print(f"{track.name} · {track.total * .2:.0f} m · {args.pop} Wagen · Seed {args.seed} · {phys} · {args.workers} Kerne\n")
     print(f"{'Gen':>4} {'bester Score':>13} {'Strecke':>8} {'Zeit':>8} {'Runden':>7} {'Rechenzeit':>11}")
-    with Pool(args.workers, initializer=_init, initargs=(args.track,)) as pool:
+    with Pool(args.workers, initializer=_init, initargs=(args.track, args.grip)) as pool:
         for gen in range(1, args.generations + 1):
             t0 = time.perf_counter()
             results = pool.map(evaluate, population)
@@ -81,6 +88,13 @@ def main():
                   f"{time.perf_counter() - t0:10.1f}s")
             export(out, args, track, best, gen, log)
             population = evo.next_generation([(r[0], w) for r, w in zip(results, population)], best["weights"], args.pop)
+    # Abschlussfahrt des besten Fahrers mit eingefrorenen Gewichten – dient im Browser-Test
+    # (tests/regression.cjs) als Paritätsreferenz.
+    car, reason, _ = reference.drive(track, best["weights"], args.grip)
+    test = {"trackId": track.id, "course": track.name, "driver": "Python-Training",
+            "progressPercent": max(0, min(100, car.max / track.total * 100)), "time": car.time,
+            "completed": reason == "Runde geschafft!", "reason": reason, "weightsUnchanged": True}
+    export(out, args, track, best, gen, log, [test])
     print(f"\nGespeichert: {out}  →  im Browser „JSON-Stand laden“ oder: python3 replay.py {out}")
 
 
