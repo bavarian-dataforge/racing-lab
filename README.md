@@ -88,6 +88,11 @@ Dort **Training starten** klicken. Beenden mit `Strg+C` im Terminal.
 
 Fertige Fahrer liegen in `racing-lab-v2/fahrer/` und lassen sich über **JSON-Stand laden** übernehmen.
 
+Die Fahrer im Repository sind schlanke Kopien. Die **vollständigen Trainingsprotokolle** mit den
+Gewichten jedes Versuchs und allen Messpunkten gibt es als Download im Release
+[Trainingsdaten 23.10.2026](https://github.com/bavarian-dataforge/racing-lab/releases/tag/daten-2026-10-23)
+(ZIP, 37 MB, mit Übersicht und Prüfsummen).
+
 **In Python**, ohne Zusatzpakete und bitgenau gleich wie der Browser:
 
 ```bash
