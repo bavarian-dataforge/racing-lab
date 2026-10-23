@@ -273,3 +273,26 @@ der Unterschied ist aber sehr deutlich.
 
 Browser und Python rechnen identisch, Rundenzeit und Punktzahl
 (`fahrer/fahrer-training-v1physik-abstand+ruhe-seed2.json`).
+
+## v2.9 · Browser-Fahrer mit Haftung und Lenkruhe (Flo, 23.10.2026)
+
+Flo hat die neuen Bewertungen im Browser mit Haftung ausprobiert: 40 Wagen, Population,
+Testkurs 01, jeweils neu begonnen. Alle Ergebnisse reproduziert `replay.py` exakt.
+
+| Physik | Bewertung | Generation | Kurs 01 | 02 | 03 | 04 | 05 | Ring | gesamt |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Haftung + Gleitreibung | Standard | 60 | 27,63 s | ✗ 74 % | 20,38 s | ✗ 17 % | ✗ 13 % | ✗ 8 % | 2/6 |
+| Haftung + Gleitreibung | Abstand + Lenkruhe | 70 | 29,67 s | ✗ 41 % | 26,83 s | ✗ 24 % | ✗ 49 % | ✗ 8 % | 2/6 |
+| Haftung ohne Gleitreibung | Lenkruhe | 73 | 26,10 s | ✗ 76 % | 22,85 s | ✗ 38 % | ✗ 3 % | ✗ 45 % | 2/6 |
+| **Haftung + Gleitreibung** | **Lenkruhe** | **68** | **29,25 s** | **29,58 s** | **23,23 s** | **34,25 s** | ✗ 50 % | **234,27 s** | **5/6** |
+
+**Fund:** Der Fahrer mit Haftung + Gleitreibung und Lenkruhe ist der erste mit realistischer
+Physik, der den Nürburgring schafft. Bisher kam keiner über die Hälfte. Er lenkt ruhig
+(Lenkweg 11,8, 0,14 Lenkwechsel/s), rutscht nur 27 % der Fahrzeit (Standard: 58 %) und fährt
+höchstens 82 km/h. Gebremst wird weiterhin nie: Er hat ein gleichmäßiges Tempo gefunden, bei
+dem die Haftung reicht. Der Preis ist Zeit: Nürburgring 234 s statt 152 s ohne Haftung.
+
+**Einschränkung:** Das sind Einzelfahrer, im Browser ohne festen Seed trainiert. Auffällig
+ist, dass die Kombination mit der Abstandsregel unter Haftung schlechter abschnitt (2/6). Ob
+die Abstandsregel mit Haftung tatsächlich stört, ist offen und braucht ein Experiment mit
+mehreren Seeds. Fahrer: `fahrer/fahrer-training-slide-ruhe-browser-2026-10-23.json`.

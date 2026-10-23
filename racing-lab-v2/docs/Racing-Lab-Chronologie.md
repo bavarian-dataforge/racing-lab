@@ -302,6 +302,17 @@ Das Paket enthält die ausführbare Oberfläche, den Simulationscode, Startanlei
   sondern das richtige Gütekriterium. Abstand halten und ruhig lenken sind genau die
   Eigenschaften, die Flos erster Fahrer zufällig hatte.
 
+## 22. Der erste realistische Fahrer auf dem Nürburgring (Browser, Flo)
+
+- **Was Flo gemacht hat:** Die neuen Bewertungen im Browser mit Haftung trainiert und getestet:
+  Standard, Abstand + Lenkruhe und Lenkruhe allein, je mit Haftung mit oder ohne Gleitreibung.
+- **Fund:** Haftung + Gleitreibung mit Lenkruhe allein, Generation 68, schafft 5 von 6 Strecken,
+  einschließlich Nürburgring in 234 s. Als erster Fahrer mit realistischer Physik. Flos Urteil:
+  „der schönste, harmonischste“. Gemessen: Lenkweg 11,8, rutscht 27 % statt 58 %, höchstens 82 km/h.
+- **Weiterhin offen:** Bremsen lernt keiner. Die Fahrer wählen ein gleichmäßig vorsichtiges Tempo.
+  Unklar ist, ob die Abstandsregel unter Haftung schadet (im Einzelvergleich 2/6 statt 5/6).
+  Klärung per Python-Experiment mit mehreren Seeds.
+
 ## Technische Vereinfachungen
 
 Das Fahrzeug verwendet ein vereinfachtes kinematisches Modell mit Lenkung, Beschleunigen, Bremsen und geschwindigkeitsabhängigem Widerstand. Es werden keine Federung, Dämpfung, Reifenschlupf, Motorkennfelder oder Drehzahl simuliert.

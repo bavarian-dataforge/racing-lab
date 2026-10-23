@@ -110,6 +110,10 @@ Mehr dazu in [`racing-lab-v2/python/README.md`](racing-lab-v2/python/README.md).
   in der Bewertung schafften alle drei Fahrer eines Experiments den Nürburgring, zwei sogar alle
   Prüfstrecken. Ohne diese Regeln schaffte das keiner. Der Preis: rund 1,3 s pro Runde auf der
   Trainingsstrecke ([Experiment](racing-lab-v2/docs/Validierung.md)).
+- **Auch mit echter Reifenhaftung hilft ruhiges Lenken.** Ein im Browser trainierter Fahrer mit
+  Haftung, Gleitreibung und Lenkruhe schaffte als erster mit dieser realistischen Physik den
+  Nürburgring, insgesamt 5 von 6 Strecken. Er fährt dafür gemächlich (höchstens 82 km/h) und
+  bremst nie ([Messung](racing-lab-v2/docs/Validierung.md)).
 - **Abstand halten macht vielseitiger.** Mit einer Abstandsregel in der Bewertung (seitlich
   mindestens 2,5 m zur Wand) schafften die Fahrer im Schnitt 3,3 statt 2,0 von 5 Prüfstrecken.
   Das kostete 0,3 s pro Runde ([Experiment](racing-lab-v2/docs/Validierung.md)).
