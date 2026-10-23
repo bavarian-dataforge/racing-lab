@@ -68,14 +68,20 @@ Lernverfahren fest.*
 
 ## Selbst ausprobieren
 
-**Im Browser**, ohne Installation:
+**Im Browser**, ohne Installation: Repository klonen oder als ZIP herunterladen und entpacken.
+Dann im Hauptordner (`racing-lab` bzw. `racing-lab-main` beim ZIP):
 
 ```bash
-cd racing-lab-v2
 python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
-Danach <http://127.0.0.1:8000> öffnen und **Training starten** klicken. Fertige Fahrer
+Danach <http://127.0.0.1:8000> öffnen. Die Seite leitet zur aktuellen Version weiter.
+Dort **Training starten** klicken. Beenden mit `Strg+C` im Terminal.
+
+> **„Address already in use“?** Auf Port 8000 läuft schon ein anderer Server, oft ein
+> vergessener aus einem anderen Terminal. Entweder dort mit `Strg+C` beenden oder einen
+> anderen Port nehmen: `python3 -m http.server 8001 --bind 127.0.0.1` und
+> <http://127.0.0.1:8001> öffnen. Fertige Fahrer
 liegen in `racing-lab-v2/fahrer/` und lassen sich über **JSON-Stand laden** übernehmen.
 
 **In Python**, ohne Zusatzpakete und bitgenau gleich wie der Browser:
