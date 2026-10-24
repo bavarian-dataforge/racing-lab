@@ -103,6 +103,15 @@ train.py
 produces the same generations. That is the precondition for fair comparisons such as
 "40 vs. 80 cars": change only one variable per experiment and compare several seeds.
 
+`seeds.py` does exactly that in one command: it trains with every seed (via `train.py`),
+tests each driver with frozen weights on all tracks and prints how many seeds completed
+each track. Drivers, logs and a `summary.json` land in `../drivers/seeds-<settings>-<date>/`.
+
+```bash
+python3 seeds.py --seeds 1 2 3 4 5 --generations 14 --pop 80 --grip 0 --clearance
+python3 seeds.py --seeds 1 2 3 4 5 --generations 14 --pop 80 --grip 0   # same without the rule
+```
+
 ## Later: reinforcement learning (PPO)
 
 `reference.advance()` already is what an RL environment needs: observation (9 numbers) in,

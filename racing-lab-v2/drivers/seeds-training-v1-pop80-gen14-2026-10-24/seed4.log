@@ -1,0 +1,19 @@
+Test track 01 · Training track · 540 m · Population (genetic algorithm) · 80 cars · Python, seed 4 · no grip limit (v1) · scoring Standard
+
+ Gen    best score distance     time    laps     compute
+   1        1135.8    42.4%   11.67s    0/80        0.9s
+   2        1398.3    52.3%   21.12s    0/80        0.5s
+   3        1398.3    52.3%   21.12s    0/80        1.0s
+   4        1412.9    52.6%    9.65s    0/80        1.0s
+   5        1412.9    52.6%    9.65s    0/80        0.5s
+   6        2381.2    88.6%   15.82s    0/80        0.5s
+   7        2385.9    88.8%   16.38s    0/80        1.0s
+   8        3188.2   100.0%   16.92s    2/80        0.7s
+   9        3188.2   100.0%   16.92s    3/80        0.9s
+  10        3188.2   100.0%   16.92s    5/80        0.7s
+  11        3188.2   100.0%   16.90s    6/80        0.7s
+  12        3188.4   100.0%   16.58s    8/80        0.9s
+  13        3188.6   100.0%   16.30s    9/80        0.9s
+  14        3188.6   100.0%   16.30s    9/80        0.8s
+
+Saved: /Users/florianenglmeier/nextcloud/Documents/Programming/GitHub/Racing-Lab/racing-lab-v2/drivers/seeds-training-v1-pop80-gen14-2026-10-24/seed4.json  →  in the browser "Load JSON state" or: python3 replay.py /Users/florianenglmeier/nextcloud/Documents/Programming/GitHub/Racing-Lab/racing-lab-v2/drivers/seeds-training-v1-pop80-gen14-2026-10-24/seed4.json

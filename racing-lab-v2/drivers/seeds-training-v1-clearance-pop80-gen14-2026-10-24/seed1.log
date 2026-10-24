@@ -1,0 +1,19 @@
+Test track 01 · Training track · 540 m · Population (genetic algorithm) · 80 cars · Python, seed 1 · no grip limit (v1) · scoring with clearance rule 2.5 m
+
+ Gen    best score distance     time    laps     compute
+   1        1191.1    44.4%    8.35s    0/80        1.0s
+   2        2372.0    89.3%   27.70s    0/80        0.5s
+   3        2372.0    89.3%   27.70s    0/80        0.5s
+   4        2372.0    89.3%   27.70s    0/80        0.9s
+   5        2372.0    89.3%   27.70s    0/80        1.0s
+   6        2372.0    89.3%   27.70s    0/80        0.6s
+   7        2372.0    89.3%   27.70s    0/80        1.2s
+   8        2372.0    89.3%   27.70s    0/80        0.6s
+   9        3173.2   100.0%   25.20s    1/80        0.6s
+  10        3180.9   100.0%   20.77s    2/80        0.7s
+  11        3180.9   100.0%   20.77s    2/80        0.7s
+  12        3180.9   100.0%   20.77s    4/80        1.0s
+  13        3180.9   100.0%   20.77s    5/80        0.9s
+  14        3180.9   100.0%   20.77s    8/80        0.8s
+
+Saved: /Users/florianenglmeier/nextcloud/Documents/Programming/GitHub/Racing-Lab/racing-lab-v2/drivers/seeds-training-v1-clearance-pop80-gen14-2026-10-24/seed1.json  →  in the browser "Load JSON state" or: python3 replay.py /Users/florianenglmeier/nextcloud/Documents/Programming/GitHub/Racing-Lab/racing-lab-v2/drivers/seeds-training-v1-clearance-pop80-gen14-2026-10-24/seed1.json
