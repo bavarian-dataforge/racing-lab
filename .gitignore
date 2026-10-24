@@ -7,3 +7,6 @@ __pycache__/
 # Raw browser exports (racing-*.json, often >10 MB) stay local.
 # Only slim copies (driver-*.json) go into the repository.
 racing-lab-v2/drivers/racing-*.json
+
+# Blender backup copies (written on every save)
+*.blend1

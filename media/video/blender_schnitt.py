@@ -59,6 +59,8 @@ TAKES = [
      "Nach 15 Generationen: drei Strecken verlernt."),
 ]
 TAKE_G = ("take-g-seeds.png", 7.0)
+ABSPANN = ("abspann.png", 3.5)     # end card from abspann.py (repo link, date, Made with Blender)
+FADE = 0.5                         # seconds of fade from black at the start and to black at the end
 
 
 def box(layout, focus):
@@ -137,11 +139,32 @@ def add_take(scene, i, frame):
     return start + length
 
 
-def add_take_g(scene, frame):
-    path, seconds = TAKE_G
-    st = strips(scene).new_image(name="Take G", filepath=os.path.join(HERE, path), channel=1, frame_start=frame, fit_method="FIT")
+def add_still(scene, name, still, frame):
+    path, seconds = still
+    st = strips(scene).new_image(name=name, filepath=os.path.join(HERE, path), channel=1, frame_start=frame, fit_method="FIT")
     st.frame_final_duration = int(seconds * FPS)
     return frame + int(seconds * FPS)
+
+
+def add_take_g(scene, frame):
+    """Take G and the end card."""
+    return add_still(scene, "Abspann", ABSPANN, add_still(scene, "Take G", TAKE_G, frame))
+
+
+def fade(strip, frame_a, frame_b, alpha_a, alpha_b):
+    """Opacity from alpha_a to alpha_b; below the first and last strip there is nothing, so it fades to black."""
+    for frame, alpha in ((frame_a, alpha_a), (frame_b, alpha_b)):
+        strip.blend_alpha = alpha
+        strip.keyframe_insert("blend_alpha", frame=frame)
+
+
+def add_fades(scene, end):
+    n = int(FADE * FPS)
+    for st in strips(scene):
+        if st.frame_final_start == 1:        # first take and its caption
+            fade(st, 1, 1 + n, 0.0, 1.0)
+        elif st.name == "Abspann":
+            fade(st, end - n, end, 1.0, 0.0)
 
 
 def build_all(scene):
@@ -151,6 +174,7 @@ def build_all(scene):
         frame = add_take(scene, i, frame)
     end = add_take_g(scene, frame)
     scene.frame_start, scene.frame_end = 1, end - 1
+    add_fades(scene, end - 1)
 
 
 def build_visibly():
@@ -167,6 +191,7 @@ def build_visibly():
         else:
             end = add_take_g(scene, state["frame"])
             scene.frame_start, scene.frame_end = 1, end - 1
+            add_fades(scene, end - 1)
             scene.frame_current = 1
             print("Fertig: alle Takes im Sequencer.")
             return None
@@ -184,7 +209,7 @@ def remove_own_strips(scene):
     col = strips(scene)
     for st in list(col):
         own = (getattr(st, "type", "") == "MOVIE" and os.path.basename(bpy.path.abspath(st.filepath)) in files) \
-            or st.name == "Take G" or (getattr(st, "type", "") == "TEXT" and st.name.startswith("Text "))
+            or st.name in ("Take G", "Abspann") or (getattr(st, "type", "") == "TEXT" and st.name.startswith("Text "))
         if own:
             col.remove(st)
 
