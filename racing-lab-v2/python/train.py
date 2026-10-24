@@ -40,6 +40,11 @@ def physics(grip, slide):
     return {"model": "kamm", "grip": grip, "slide": slide} if grip else {"model": "v1"}
 
 
+def settings(args):
+    """Physics and scoring per attempt, with the browser's ids (v1 · grip · slide, standard · abstand …)."""
+    return {"physics": "v1" if not args.grip else "grip" if args.slide >= 1 else "slide", "scoring": scoring(args)[1]["model"]}
+
+
 def scoring(args):
     """Scoring in words and as data – same wording and model names as in the browser.
     Models: standard · abstand (clearance) · ruhe (calm) · abstand+ruhe; the model names are
@@ -112,7 +117,7 @@ def run_population(args, track, evo, start, out, log):
             if score > best["score"]:
                 best = {"score": score, "progress": prog, "weights": population[top][:], "at": now()}
             laps = sum(r[3] == reference.LAP for r in results)
-            log.append({"at": now(), "algorithm": algorithm(args), "attempt": gen * args.pop, "generation": gen, "score": score, "progress": prog,
+            log.append({"at": now(), "algorithm": algorithm(args), **settings(args), "attempt": gen * args.pop, "generation": gen, "score": score, "progress": prog,
                         "time": t, "reason": reason, "improved": score >= best["score"]})
             print(f"{gen:4d} {score:13.1f} {min(prog / track.total, 1) * 100:7.1f}% {t:7.2f}s {laps:4d}/{args.pop:<3d}"
                   f"{time.perf_counter() - t0:10.1f}s")
@@ -134,7 +139,7 @@ def run_single(args, track, evo, start, out, log):
         if improved:
             best = {"score": score, "progress": prog, "weights": weights[:], "at": now()}
             print(f"{attempt:7d} {score:10.1f} {min(prog / track.total, 1) * 100:7.1f}% {t:7.2f}s  {reason} · improvement")
-        log.append({"at": now(), "algorithm": algorithm(args), "attempt": attempt, "generation": attempt, "car": 0,
+        log.append({"at": now(), "algorithm": algorithm(args), **settings(args), "attempt": attempt, "generation": attempt, "car": 0,
                     "score": score, "progress": prog, "time": t, "reason": reason, "improved": improved})
         if improved or attempt % 50 == 0:
             export(out, args, track, best, attempt, log[-200:])
