@@ -1,0 +1,241 @@
+{
+ "createdAt": "2026-10-24T14:50:03+00:00",
+ "settings": {
+  "seeds": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "track": "training",
+  "pop": 80,
+  "generations": 43,
+  "grip": 0.0,
+  "slide": 0.7,
+  "clearance": true,
+  "calm": false,
+  "init": null
+ },
+ "physics": "no grip limit (v1)",
+ "lapsPerTrack": {
+  "training": 5,
+  "curves": 5,
+  "oval": 5,
+  "hairpin": 5,
+  "reverse": 5,
+  "nuerburgring": 1
+ },
+ "runs": [
+  {
+   "seed": 1,
+   "file": "seed1.json",
+   "results": {
+    "training": {
+     "completed": true,
+     "time": 16.36666666666702,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "curves": {
+     "completed": true,
+     "time": 15.933333333333705,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "oval": {
+     "completed": true,
+     "time": 15.350000000000342,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "hairpin": {
+     "completed": true,
+     "time": 18.716666666666885,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "reverse": {
+     "completed": true,
+     "time": 16.783333333333662,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "nuerburgring": {
+     "completed": false,
+     "time": 40.416666666665655,
+     "progressPercent": 26.341185975704107,
+     "reason": "Wall contact"
+    }
+   }
+  },
+  {
+   "seed": 2,
+   "file": "seed2.json",
+   "results": {
+    "training": {
+     "completed": true,
+     "time": 16.31666666666702,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "curves": {
+     "completed": true,
+     "time": 15.866666666667035,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "oval": {
+     "completed": true,
+     "time": 15.250000000000338,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "hairpin": {
+     "completed": true,
+     "time": 18.600000000000225,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "reverse": {
+     "completed": true,
+     "time": 16.75000000000033,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "nuerburgring": {
+     "completed": false,
+     "time": 131.2333333333299,
+     "progressPercent": 86.58610163468788,
+     "reason": "Wall contact"
+    }
+   }
+  },
+  {
+   "seed": 3,
+   "file": "seed3.json",
+   "results": {
+    "training": {
+     "completed": true,
+     "time": 16.16666666666703,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "curves": {
+     "completed": true,
+     "time": 15.70000000000036,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "oval": {
+     "completed": true,
+     "time": 15.133333333333665,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "hairpin": {
+     "completed": true,
+     "time": 18.650000000000222,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "reverse": {
+     "completed": true,
+     "time": 16.83333333333366,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "nuerburgring": {
+     "completed": false,
+     "time": 38.699999999999086,
+     "progressPercent": 25.17265883052266,
+     "reason": "Wall contact"
+    }
+   }
+  },
+  {
+   "seed": 4,
+   "file": "seed4.json",
+   "results": {
+    "training": {
+     "completed": true,
+     "time": 16.333333333333687,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "curves": {
+     "completed": true,
+     "time": 15.866666666667035,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "oval": {
+     "completed": true,
+     "time": 15.283333333333672,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "hairpin": {
+     "completed": true,
+     "time": 18.633333333333557,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "reverse": {
+     "completed": true,
+     "time": 16.683333333333668,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "nuerburgring": {
+     "completed": true,
+     "time": 151.30000000001255,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    }
+   }
+  },
+  {
+   "seed": 5,
+   "file": "seed5.json",
+   "results": {
+    "training": {
+     "completed": true,
+     "time": 16.216666666667027,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "curves": {
+     "completed": true,
+     "time": 15.76666666666703,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "oval": {
+     "completed": true,
+     "time": 15.166666666667,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "hairpin": {
+     "completed": true,
+     "time": 18.600000000000225,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "reverse": {
+     "completed": true,
+     "time": 16.75000000000033,
+     "progressPercent": 100,
+     "reason": "Lap completed!"
+    },
+    "nuerburgring": {
+     "completed": false,
+     "time": 35.79999999999925,
+     "progressPercent": 23.31974987162722,
+     "reason": "Wall contact"
+    }
+   }
+  }
+ ]
+}
