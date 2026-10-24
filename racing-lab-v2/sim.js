@@ -325,7 +325,8 @@ $('popSize').onchange=e=>{popSize=Number(e.target.value)||40;};
 $('toggle').onclick=()=>{if(trackId!==driverId){$('status').textContent=t('status.sameTrack');return;}
   if(running&&!testMode){running=false;return;}testMode=false;collision=null;startGeneration(trainingModels());running=true;$('status').textContent=method==='single'?t('status.singleLearning'):t('status.genStart',{g:generation,n:cars.length});};
 $('bestRun').onclick=()=>beginTest();
-$('reset').onclick=()=>{running=false;testMode=false;collision=null;clearState();showTestResults();store.del(keys.driver(driverId));if(driverId==='training')store.del(keys.v1);$('logCount').textContent=t('log.count',{n:0});$('storageStatus').textContent=t('storage.reset',{driver:label(driverId)});switchCourse(driverId);$('status').textContent=t('status.reset');};
+// Start over applies to the track shown: on a trainable track, switch to its driver first
+$('reset').onclick=()=>{if(trackId!==driverId&&courses[trackId].trainable)switchDriver(trackId);running=false;testMode=false;collision=null;clearState();showTestResults();store.del(keys.driver(driverId));if(driverId==='training')store.del(keys.v1);$('logCount').textContent=t('log.count',{n:0});$('storageStatus').textContent=t('storage.reset',{driver:label(driverId)});switchCourse(driverId);$('status').textContent=t('status.reset');};
 
 // ---------- Start ----------
 I.applyStatic();$('lang').value=I.lang;$('logCount').textContent=t('log.count',{n:0});
