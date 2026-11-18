@@ -302,3 +302,40 @@ Files (slim copies in `drivers/`, same order as the table):
 Plus Flo's browser driver without grip with clearance + calm (generation 62, 5 of 6 tracks,
 Nürburgring 152.55 s, fails only at the start of the reverse direction):
 `driver-training-v1physics-clearance+calm-browser-2026-10-23.json`.
+
+## Browser driver with clearance rule, 80 cars, 12 generations (Flo, 2026-11-18)
+
+Flo trained in the browser from scratch: test track 01, v1 physics, clearance rule 2.5 m (no
+steering calm), population of 80 cars, 12 generations (838 attempts). First full lap in
+generation 4, best driver from generation 10. It is the first driver with the clearance rule
+alone that completes **all six tracks**. `replay.py` reproduces every lap exactly.
+
+| Track | time |
+| --- | --- |
+| Test track 01 (training) | ✓ 16.75 s |
+| Test track 02 · Alternating bends | ✓ 16.32 s |
+| Test track 03 · Wide arcs | ✓ 15.58 s |
+| Test track 04 · Tight corners | ✓ 19.08 s |
+| Test track 05 · Reverse direction | ✓ 16.98 s |
+| Nürburgring | ✓ 152.13 s |
+
+The test log in the export also shows the way there: drivers from earlier generations of the
+same run already completed tracks 01–04 but failed the reverse direction and the Nürburgring.
+
+**It completes everything, but it does not steer calmly.** Steering travel Σ|Δsteer|, measured
+the same way for all three drivers:
+
+| Driver | Nürburgring | steering travel track 01 | steering travel Nürburgring |
+| --- | --- | --- | --- |
+| Flo, clearance rule, 80 cars, gen. 12 (browser) | 152.13 s | 45.0 | 310.2 |
+| Python seed 4, clearance rule, 80 cars, gen. 43 | 151.3 s | 78.8 | 150.4 |
+| Clearance + calm, seed 2 (Python) | 152.1 s | 8.8 | 49.3 |
+
+**Classification:** the Python seed run with the same settings (test track 01, 80 cars,
+clearance rule, `drivers/seeds-training-v1-clearance-pop80-gen14-2026-10-24/` and `…-gen43-…`)
+found such a driver in 1 of 5 seeds, both after 14 and after 43 generations. Flo's driver is
+therefore a lucky hit of the kind the clearance rule makes possible, not a reliable outcome.
+Keeping clearance makes drivers more versatile; calm steering comes only from steering calm.
+Single run, trained in the browser without a fixed seed.
+
+File (slim copy): `drivers/driver-training-v1physics-clearance-browser-80cars-2026-11-18.json`.
